@@ -5,6 +5,13 @@ defmodule RequestInspector.Router do
 
   use Plug.Router
 
+
+  plug(
+    Plug.Static,
+    at: "/",
+    from: :request_inspector,
+  )
+
   plug(
     Plug.Parsers,
     parsers: [:urlencoded, :multipart, :json],

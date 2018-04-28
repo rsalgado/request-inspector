@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Request Inspector</title>
+</head>
+<body>
+    <h1>Requests:</h1>    
+    
+    <div id="app">
+        <ul class="requests-list">
+            <li v-for="request in requests">
+                {{request.method}} {{request.path}}
+            </li>
+        </ul>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script type="text/javascript" src="app.js"></script>    
+</body>
+</html>
