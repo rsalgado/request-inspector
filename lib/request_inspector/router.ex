@@ -1,5 +1,5 @@
-defmodule Example.Router do
-  alias Example.RequestsAgent
+defmodule RequestInspector.Router do
+  alias RequestInspector.RequestsAgent
   require IEx
   require Logger
 

@@ -1,4 +1,4 @@
-defmodule Example.RequestsAgent do
+defmodule RequestInspector.RequestsAgent do
   require Logger
 
   use Agent
