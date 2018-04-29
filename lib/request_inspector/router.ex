@@ -1,6 +1,7 @@
 defmodule RequestInspector.Router do
   alias RequestInspector.RequestsAgent
   require Logger
+  require IEx
 
   use Plug.Router
 
@@ -19,8 +20,8 @@ defmodule RequestInspector.Router do
   plug(:match)
   plug(:dispatch)
 
-  ## Endpoints
 
+  ## Endpoints
 
   get "/" do
     conn
@@ -41,12 +42,12 @@ defmodule RequestInspector.Router do
 
   # Endpoint (send your requests here)
   match "/endpoint" do
-    # Create the response
+    # Store and encode request
     json_response =
       conn
       |> parse_request()
-      |> RequestsAgent.store_request()
-      |> Poison.encode!(pretty: true)
+      |> RequestsAgent.store_request()  # Store the request
+      |> Poison.encode!(pretty: true)   # Create a JSON string with it
 
     # Notify update to browser
     notify_update()
@@ -62,7 +63,7 @@ defmodule RequestInspector.Router do
     # Store current connection's process ID
     StreamAgent.set_connection_pid(self())
 
-    # Send initial response
+    # Send initial response to open the stream
     conn =
       conn
       |> put_resp_header("content-type", "text/event-stream")
@@ -92,16 +93,19 @@ defmodule RequestInspector.Router do
   # Listen to internal messages to current connection's process
   defp stream_events(conn) do
     receive do
-      # Send a update message to browser and loop (with tail-call)
+      # Send an update message to browser and loop (with a tail call)
       :updated ->
         message_data = "updated"
         Plug.Conn.chunk(conn, ~s(data: #{message_data}\n\n))
         stream_events(conn) # Loop
 
-      # Give back the conn (and break the loop)
+      # Close the stream (and break the loop)
+      # This is not used in the code currently, but might be useful (for example in iex)
       :close_stream ->
-        conn
+        Logger.warn("Stream closed")
     end
+    # Return the connection
+    conn
   end
 
   defp notify_update() do
