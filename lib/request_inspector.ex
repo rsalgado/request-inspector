@@ -1,6 +1,6 @@
 defmodule RequestInspector do
   use Application
-  
+
   alias RequestInspector.RequestsAgent
   require Logger
 
@@ -8,7 +8,7 @@ defmodule RequestInspector do
     children = [
       Plug.Adapters.Cowboy.child_spec(:http, RequestInspector.Router, [], port: 5000),
       RequestsAgent.child_spec([]),
-      StreamAgent.child_spec([]),
+      StreamAgent.child_spec([])
     ]
 
     Logger.info("Starting server on port 5000")

@@ -9,7 +9,7 @@ defmodule StreamAgent do
   end
 
   def set_connection_pid(new_pid) do
-    Agent.update(__MODULE__, fn _ -> new_pid  end)
+    Agent.update(__MODULE__, fn _ -> new_pid end)
     Logger.info("StreamsAgent updated")
   end
 

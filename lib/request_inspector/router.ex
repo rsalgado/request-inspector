@@ -19,7 +19,6 @@ defmodule RequestInspector.Router do
   plug(:match)
   plug(:dispatch)
 
-
   ## Endpoints
 
   # See (inspect) all the requests you have made to /endpoint
@@ -32,7 +31,6 @@ defmodule RequestInspector.Router do
     |> put_resp_header("content-type", "application/json")
     |> send_resp(200, json_response)
   end
-
 
   # Endpoint (send your requests here)
   match "/endpoint" do
@@ -52,28 +50,26 @@ defmodule RequestInspector.Router do
     |> send_resp(200, json_response)
   end
 
-
   # SSE endpoint
   get "/sse" do
     # Store current connection's process ID
     StreamAgent.set_connection_pid(self())
 
     # Send initial response
-    conn = conn
-    |> put_resp_header("content-type", "text/event-stream")
-    |> send_chunked(200)
+    conn =
+      conn
+      |> put_resp_header("content-type", "text/event-stream")
+      |> send_chunked(200)
 
     # Start streaming events to browser (returns the conn when done)
     stream_events(conn)
   end
 
-  
   # Default endpoint (matches anything else)
   match _ do
     Logger.warn("#{conn.method} request to #{conn.request_path}")
     send_resp(conn, 404, "Oops! Invalid request. Try again.")
   end
-
 
   # Build a map using the request info from the connection
   defp parse_request(connection) do
@@ -95,7 +91,8 @@ defmodule RequestInspector.Router do
         stream_events(conn)
 
       # Give back the conn (and break the loop)
-      :close_stream ->  conn
+      :close_stream ->
+        conn
     end
   end
 
@@ -103,5 +100,4 @@ defmodule RequestInspector.Router do
     conn_pid = StreamAgent.get_connection_pid()
     send(conn_pid, :updated)
   end
-
 end
