@@ -9,12 +9,19 @@ var app = new Vue({
   },
 
   created() {
-    let self = this;
+    this.loadRequests();
+  },
 
-    axios.get("/requests")
-      .then(function(resp) {
-        self.requests = resp.data;
-      });
+  methods: {
+    // Load requests from backend
+    loadRequests() {
+      let self = this;
+      
+      axios.get("/requests")
+        .then(function(resp) {
+          self.requests = resp.data;
+        });
+    }
   }
 });
 
@@ -22,7 +29,12 @@ var app = new Vue({
 let source = new EventSource("/sse");
 
 source.addEventListener("message", function(event) {
-  console.log(`Received event: ${event.data}`);
+  console.log(`Received event: ${event}`);
+
+  // Make the Vue app reload the requests when there was an update
+  if (event.data === "updated") {
+    app.loadRequests();
+  }
 }, false);
 
 source.addEventListener("open", function(event) {

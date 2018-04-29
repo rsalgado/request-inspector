@@ -87,8 +87,9 @@ defmodule RequestInspector.Router do
     receive do
       # Send a update message to browser and loop (with tail-call)
       :updated ->
-        Plug.Conn.chunk(conn, ~s(data: updated\n\n))
-        stream_events(conn)
+        message_data = "updated"
+        Plug.Conn.chunk(conn, ~s(data: #{message_data}\n\n))
+        stream_events(conn) # Loop
 
       # Give back the conn (and break the loop)
       :close_stream ->
