@@ -9,7 +9,15 @@
     <div id="app">
         <ul class="requests-list">
             <li v-for="request in requests">
-                {{request.method}} {{request.path}}
+                <div>{{request.method}} {{request.path}}</div>
+                <div>
+                    <b>Headers</b>
+                    <ul>
+                        <li v-for="(value, name) in request.headers">
+                            {{name}}: {{value}}
+                        </li>
+                    </ul>
+                </div>
             </li>
         </ul>
     </div>

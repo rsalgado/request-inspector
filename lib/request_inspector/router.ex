@@ -21,6 +21,13 @@ defmodule RequestInspector.Router do
 
   ## Endpoints
 
+
+  get "/" do
+    conn
+    |> put_resp_header("content-type", "text-html")
+    |> send_file(200, "priv/static/index.html")
+  end
+
   # See (inspect) all the requests you have made to /endpoint
   get "/requests" do
     json_response =
@@ -82,8 +89,8 @@ defmodule RequestInspector.Router do
     }
   end
 
+  # Listen to internal messages to current connection's process
   defp stream_events(conn) do
-    # Listen to internal messages to this process 
     receive do
       # Send a update message to browser and loop (with tail-call)
       :updated ->
