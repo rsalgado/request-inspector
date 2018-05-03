@@ -2,6 +2,7 @@ defmodule RequestInspector do
   use Application
 
   alias RequestInspector.RequestsAgent
+  alias RequestInspector.StreamAgent
   require Logger
 
   def start(_type, _args) do

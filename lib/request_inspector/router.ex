@@ -1,5 +1,6 @@
 defmodule RequestInspector.Router do
   alias RequestInspector.RequestsAgent
+  alias RequestInspector.StreamAgent
   require Logger
   require IEx
 
