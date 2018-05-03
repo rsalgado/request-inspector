@@ -69,8 +69,11 @@ defmodule RequestInspector.Router do
       |> put_resp_header("content-type", "text/event-stream")
       |> send_chunked(200)
 
-    # Start streaming events to browser (returns the conn when done)
-    stream_events(conn)
+    # Start streaming events to browser
+    stream_loop(conn)
+
+    # Return the connection
+    conn
   end
 
   # Default endpoint (matches anything else)
@@ -78,6 +81,7 @@ defmodule RequestInspector.Router do
     Logger.warn("#{conn.method} request to #{conn.request_path}")
     send_resp(conn, 404, "Oops! Invalid request. Try again.")
   end
+
 
   # Build a map using the request info from the connection
   defp parse_request(connection) do
@@ -91,25 +95,37 @@ defmodule RequestInspector.Router do
   end
 
   # Listen to internal messages to current connection's process
-  defp stream_events(conn) do
-    receive do
-      # Send an update message to browser and loop (with a tail call)
-      :updated ->
-        message_data = "updated"
-        Plug.Conn.chunk(conn, ~s(data: #{message_data}\n\n))
-        stream_events(conn) # Loop
+  defp stream_loop(conn) do
+    # Text to be sent as SSE chunk
+    message_data = "updated"
+    sse_message = ~s(data: #{message_data}\n\n)
 
-      # Close the stream (and break the loop)
-      # This is not used in the code currently, but might be useful (for example in iex)
+    receive do
+      :notify ->
+        # Try to send a SSE message to notify browser that state was updated
+        # If chunk was sent succesfully, loop (with a recursive tail call)
+        # If chunk couldn't be sent, send process message to close stream
+        case Plug.Conn.chunk(conn, sse_message) do
+          {:ok, conn} ->  
+            stream_loop(conn)
+
+          _ ->
+            Logger.warn("Unable to send chunk. Stream is getting closed.")
+            send(self(), :close_stream)   # Send :close_stream message to itself
+        end
+      
       :close_stream ->
+        # Close the stream (and break the loop)
+        # This can also be used to close connection from iex or another place
         Logger.warn("Stream closed")
     end
-    # Return the connection
-    conn
   end
 
+  # Send message to process (PID) to trigger notification
   defp notify_update() do
     conn_pid = StreamAgent.get_connection_pid()
-    send(conn_pid, :updated)
+    if conn_pid do 
+      send(conn_pid, :notify)
+    end
   end
 end

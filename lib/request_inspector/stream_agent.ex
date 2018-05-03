@@ -11,9 +11,20 @@ defmodule StreamAgent do
   def set_connection_pid(new_pid) do
     Agent.update(__MODULE__, fn _ -> new_pid end)
     Logger.info("StreamsAgent updated")
+    new_pid
   end
 
   def get_connection_pid() do
-    Agent.get(__MODULE__, & &1)
+    conn_pid = Agent.get(__MODULE__, & &1)
+    
+    cond do
+      conn_pid == nil ->
+        nil
+      Process.alive?(conn_pid) ->
+        conn_pid
+      true ->
+        # Process is dead. Update the state to nil and return it (nil)
+        set_connection_pid(nil)
+    end
   end
 end
