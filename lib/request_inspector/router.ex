@@ -6,6 +6,7 @@ defmodule RequestInspector.Router do
 
   use Plug.Router
 
+
   plug(
     Plug.Static,
     at: "/",
@@ -14,7 +15,7 @@ defmodule RequestInspector.Router do
 
   plug(
     Plug.Parsers,
-    parsers: [:urlencoded, :multipart, :json],
+    parsers: [:urlencoded, :multipart, :json, RequestsInspector.Parsers.Text],
     json_decoder: Poison
   )
 
