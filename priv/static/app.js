@@ -21,6 +21,11 @@ var app = new Vue({
         .then(function(resp) {
           self.requests = resp.data;
         });
+    },
+
+    isJSON(request) {
+      let contentType = request.headers["content-type"];
+      contentType === "application/json";
     }
   }
 });

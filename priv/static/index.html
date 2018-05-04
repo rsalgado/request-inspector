@@ -1,31 +1,96 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Request Inspector</title>
+  <title>Request Inspector</title>
 </head>
 <body>
-    <h1>Requests:</h1>    
-    
-    <div id="app">
-        <ul class="requests-list">
-            <li v-for="request in requests">
-                <div>{{request.method}} {{request.path}}</div>
-                <div>
-                    <b>Headers</b>
-                    <ul>
-                        <li v-for="(value, name) in request.headers">
-                            {{name}}: {{value}}
-                        </li>
-                    </ul>
-                    <b>Body</b>
-                    <pre>{{request.body}}</pre>
-                </div>
-            </li>
-        </ul>
-    </div>
+  <h1>Requests:</h1>
 
-    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
-    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
-    <script type="text/javascript" src="app.js"></script>    
+  <div id="app">
+    <ul class="requests-list">
+      <li v-for="request in requests" class="request-item">
+        <div class="request-path">
+          <span class="request-method">{{request.method}}</span> {{request.path}}
+        </div>
+        <!-- Headers -->
+        <div class="request-headers">
+          <div class="section-heading">Headers</div>
+          <ul class="headers-list">
+            <li v-for="(value, name) in request.headers" class="header-item">
+              <span class="header-name">{{name}}</span>: {{value}}
+            </li>
+          </ul>
+        </div>
+        <!-- Body -->
+        <div class="request-body">
+          <div class="section-heading">Body</div>
+          <pre v-if="isJSON(request)" class="body-content">{{request.body}}</pre>
+          <pre v-else class="body-content">{{request.body.text}}</pre>
+        </div>
+
+      </li>
+    </ul>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+  <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+  <script type="text/javascript" src="app.js"></script>
+
+  <style type="text/css">
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      font-family: sans-serif;
+      font-size: 14px;
+    }
+
+    .requests-list {
+      list-style-type: none;
+      padding-left: 0;
+    }
+
+    .request-item {
+      margin: 2.5rem 0;
+      border: 1px solid #ccc;
+      padding: 1rem;
+      border-radius: 0.25rem;
+    }
+
+    .request-path {
+      font-size: 1.5rem;
+    }
+
+    .request-method {
+      font-weight: bold;
+    }
+
+    .section-heading {
+      font-weight: bold;
+      font-size: 1.125rem;
+      margin-top: .75rem;
+    }
+
+    .headers-list {
+      list-style-type: none;
+      padding-left: 1rem;
+    }
+
+    .header-item {
+      margin-top: 0.25rem;
+      font-family: monospace;
+    }
+
+    .header-name {
+      font-weight: bold;
+    }
+
+    .body-content {
+      background: rgba(0,0,0, 0.08);
+      padding: 1rem;
+      border-radius: 0.25rem;
+    }
+  </style>
 </body>
 </html>
