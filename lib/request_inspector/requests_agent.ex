@@ -9,7 +9,13 @@ defmodule RequestInspector.RequestsAgent do
   end
 
   def store_request(request) do
-    Agent.update(__MODULE__, fn requests -> [request | requests] end)
+    # Use the number of items as id for the request and store it at the top of the list
+    Agent.update(__MODULE__, fn requests ->
+      id = length(requests) + 1
+      req = Map.put(request, :id, id)
+
+      [req | requests]
+    end)
 
     Logger.info("RequestsAgent length: #{Agent.get(__MODULE__, &length(&1))} items")
     request

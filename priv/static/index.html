@@ -11,9 +11,11 @@
 
   <div id="app">
     <ul class="requests-list">
-      <li v-for="request in requests" class="request-item">
+      <li v-for="request in requests" :key="request.id" class="request-item">
         <div class="request-path request-block">
-          <span class="request-method">{{request.method}}</span> {{request.path}}
+          <span class="request-id">{{request.id}}</span>
+          <span class="request-method">{{request.method}}</span>
+          {{request.path}}
         </div>
 
         <!-- Query Params -->
@@ -99,6 +101,18 @@
 
     .request-block:first-child {
       border-top: none;
+    }
+
+    .request-id {
+      width: 3rem;
+      padding: 0.25rem 0;
+      display: inline-block;
+      background: #000;
+      color: #fff;
+      text-align: center;
+      margin-right: 1rem;
+      border-radius: 0.25rem;
+      font-size: 80%;
     }
 
     .request-path {
