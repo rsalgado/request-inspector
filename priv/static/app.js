@@ -25,7 +25,12 @@ var app = new Vue({
 
     isJSON(request) {
       let contentType = request.headers["content-type"];
-      contentType === "application/json";
+      return contentType === "application/json";
+    },
+
+    isForm(request) {
+      let contentType = request.headers["content-type"];
+      return contentType === "application/x-www-form-urlencoded";
     }
   }
 });

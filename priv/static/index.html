@@ -9,23 +9,55 @@
   <div id="app">
     <ul class="requests-list">
       <li v-for="request in requests" class="request-item">
-        <div class="request-path">
+        <div class="request-path request-block">
           <span class="request-method">{{request.method}}</span> {{request.path}}
         </div>
-        <!-- Headers -->
-        <div class="request-headers">
-          <div class="section-heading">Headers</div>
-          <ul class="headers-list">
-            <li v-for="(value, name) in request.headers" class="header-item">
-              <span class="header-name">{{name}}</span>: {{value}}
+
+        <!-- Query Params -->
+        <div class="request-query request-block">
+          <div class="section-heading">Query Params</div>
+          <ul class="query-list">
+            <li v-for="(value, name) in request.queryParams" class="query-item">
+              <div class="param-name">{{name}}:</div>
+              {{value}}
             </li>
           </ul>
         </div>
+
+        <!-- Headers -->
+        <div class="request-headers request-block">
+          <div class="section-heading">Headers</div>
+          <ul class="headers-list">
+            <li v-for="(value, name) in request.headers" class="header-item">
+              <div class="header-name">{{name}}:</div>
+              {{value}}
+            </li>
+          </ul>
+        </div>
+
         <!-- Body -->
-        <div class="request-body">
+        <div class="request-body request-block">
           <div class="section-heading">Body</div>
-          <pre v-if="isJSON(request)" class="body-content">{{request.body}}</pre>
-          <pre v-else class="body-content">{{request.body.text}}</pre>
+
+          <!-- Show form params (payload) info -->
+          <div v-if="isForm(request)">
+            <ul class="body-params-list">
+              <li v-for="(value, name) in request.body" class="param-item">
+                <div class="param-name">{{name}}:</div>
+                {{value}}
+              </li>
+            </ul>
+          </div>
+
+          <!-- Show JSON payload -->
+          <div v-else-if="isJSON(request)">
+            <pre  class="body-content">{{request.body}}</pre>
+          </div>
+
+          <!-- Show anything else as text (The server is parsing and putting any 'text/*' into body.text) -->
+          <div v-else>
+            <pre class="body-content">{{request.body.text}}</pre>
+          </div>
         </div>
 
       </li>
@@ -58,6 +90,10 @@
       border-radius: 0.25rem;
     }
 
+    .request-block {
+      margin-bottom: 1.5rem;
+    }
+
     .request-path {
       font-size: 1.5rem;
     }
@@ -75,11 +111,15 @@
     .headers-list {
       list-style-type: none;
       padding-left: 1rem;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
     }
 
     .header-item {
-      margin-top: 0.25rem;
+      margin-top: 0.75rem;
       font-family: monospace;
+      flex-basis: 47.5%;
     }
 
     .header-name {
@@ -90,6 +130,38 @@
       background: rgba(0,0,0, 0.08);
       padding: 1rem;
       border-radius: 0.25rem;
+    }
+
+    .query-list {
+      list-style-type: none;
+      padding-left: 1rem;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+    }
+
+    .query-item {
+      margin-top: 0.75rem;
+      font-family: sans-serif;
+      flex-basis: 47.5%;
+    }
+
+    .param-name {
+      font-weight: bold;
+    }
+
+    .body-params-list {
+      list-style-type: none;
+      padding-left: 1rem;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+    }
+
+    .param-item {
+      margin-top: 0.75rem;
+      font-family: monospace;
+      flex-basis: 47.5%;
     }
   </style>
 </body>
