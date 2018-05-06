@@ -1,7 +1,13 @@
 # Request Inspector
 
 A basic application for inspecting HTTP requests. I made this project for practice and learning
-purposes, with the aim of getting a little more experience with Elixir. It uses the following technologies:
+purposes, with the aim of getting a little more experience with Elixir. 
+Make requests to `/endpoint` to both get the request's info as response in a JSON and have the request
+info stored in a list you can see in the front-end at `/`. If you keep it (the front-end) open, it updates
+automatically when new requests are made.
+
+
+It uses the following technologies:
 
 * **Plug**: as the server with only a router and a few routes, and a custom `text/*` parser.
 * **Poison**: for encoding/decoding between JSON and elixir maps.
@@ -17,12 +23,13 @@ The SSE ideas where inspired by this gist: (https://gist.github.com/rbishop/e7b1
 
 As this was created for practice and learning purposes it has some limitations, like the following:
 
+* The JS code is written with currently supported **ES6** features, so it migh not work with old browsers/versions of browsers.
 * If you have multiple tabs with the front-end opened, only the newest/freshest one will get the SSE updates.
   This is because, to keep track of the client connection to send SSE messages I'm currently using just one value
   in an Agent, so everytime a new tab is open or reloaded that agent updates its value to the new client.
 * Only supports HTTP requests with form, JSON, or `text/*` (i.e. `text/html`, `text/xml`, `text/plain`, etc.) content types.
-* Vue.js and axios are currently requested from a CDN, so you need to be online, even though everything else is done locally.
-* In order to keep SSE streams open I **tweaked** the process running the `Connection` so that it `receive`s some custom messages and does a loop. 
+* Vue.js and axios are currently requested from a CDN, so you need to be online, even though everything else is done locally. I'm also using Vue in dev mode.
+* In order to keep SSE streams open I **tweaked** the process running the `Connection` so that it `receive`s some custom messages and does a loop.
   **This might not be a good practice** as it affects the normal behaviour of the connection processes. Although, once the loop is broken, the
   the process continues the rest of the request behaving as usual.
 

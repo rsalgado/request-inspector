@@ -2,18 +2,19 @@
 <html>
 <head>
   <title>Request Inspector</title>
+  <link rel="stylesheet" type="text/css" href="styles.css">
   <!-- Load vue.js and axios before rendering -->
   <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
   <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
 </head>
 <body>
-  <h1>Requests:</h1>
-
   <div id="app">
+    <h1>{{numRequests}} Requests:</h1>
+
     <ul class="requests-list">
       <li v-for="request in requests" :key="request.id" class="request-item">
         <div class="request-block">
-          <div class="request-id">{{request.id + 1}}</div>
+          <div class="request-id">{{request.id}}</div>
           <div class="request-method">{{request.method}}</div>
           <div class="request-path">{{request.path}}</div>
           <div class="request-time">{{request.time}}</div>
@@ -71,136 +72,5 @@
   </div>
   <!-- Load the app -->
   <script type="text/javascript" src="app.js"></script>
-  
-  <style type="text/css">
-    * {
-      box-sizing: border-box;
-    }
-
-    body {
-      font-family: sans-serif;
-      font-size: 14px;
-      min-width: 450px;
-    }
-
-    .requests-list {
-      list-style-type: none;
-      padding-left: 0;
-    }
-
-    .request-item {
-      margin: 2.5rem 0;
-      border: 1px solid #ccc;
-      border-radius: 0.25rem;
-      box-shadow: 0 0 8px 2px #ddd;
-    }
-
-    .request-block {
-      padding: 1rem;
-      border-top: 1px solid #ccc;
-    }
-
-    .request-block:first-child {
-      border-top: none;
-      display: flex;
-      align-items: center;
-    }
-
-    .request-id {
-      width: 3rem;
-      padding: 0.25rem 0;
-      background: #000;
-      color: #fff;
-      text-align: center;
-      margin-right: 1.5rem;
-      border-radius: 0.25rem;
-      font-size: 1.125rem;
-    }
-
-    .request-method {
-      font-weight: bold;
-      font-size: 1.5rem;
-      margin-right: 1rem;
-    }
-
-    .request-path {
-      font-size: 1rem;
-      flex-grow: 1;
-      font-size: 1.5rem;
-    }
-
-    .request-time {
-      color: #777;
-    }
-
-    .section-heading {
-      font-weight: bold;
-      font-size: 1.125rem;
-    }
-
-    .headers-list {
-      list-style-type: none;
-      padding-left: 1rem;
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: space-between;
-    }
-
-    .header-item {
-      margin-top: 0.75rem;
-      font-family: monospace;
-      flex-basis: 47.5%;
-    }
-
-    .header-name {
-      font-weight: bold;
-    }
-
-    .body-content {
-      background: rgba(0,0,0, 0.08);
-      padding: 1rem;
-      border-radius: 0.25rem;
-      overflow-x: auto;
-    }
-
-    .query-list {
-      list-style-type: none;
-      padding-left: 1rem;
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: space-between;
-    }
-
-    .query-item {
-      margin-top: 0.75rem;
-      font-family: sans-serif;
-      flex-basis: 47.5%;
-    }
-
-    .param-name {
-      font-weight: bold;
-    }
-
-    .body-params-list {
-      list-style-type: none;
-      padding-left: 1rem;
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: space-between;
-    }
-
-    .param-item {
-      margin-top: 0.75rem;
-      font-family: monospace;
-      flex-basis: 47.5%;
-    }
-
-
-    @media (min-width: 900px) {
-      .query-item, .header-item, .param-item {
-        flex-basis: 32%;
-      }
-    }
-  </style>
 </body>
 </html>

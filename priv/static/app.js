@@ -3,9 +3,14 @@ var app = new Vue({
 
   data() {
     return {
-      greeting: "Hello from Vue!",
       requests: []
     };
+  },
+
+  computed: {
+    numRequests() {
+      return this.requests.length;
+    }
   },
 
   created() {
