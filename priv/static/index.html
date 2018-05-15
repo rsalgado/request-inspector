@@ -58,12 +58,12 @@
 
           <!-- Show JSON payload -->
           <div v-else-if="isJSON(request)">
-            <pre  class="body-content">{{request.body}}</pre>
+            <pre  class="body-content"><code class="json">{{request.body}}</code></pre>
           </div>
 
           <!-- Show anything else as text (The server is parsing and putting any 'text/*' into body.text) -->
-          <div v-else>
-            <pre class="body-content">{{request.body.text}}</pre>
+          <div v-else-if="isText(request)">
+            <pre class="body-content"><code :class="getTextType(request)">{{request.body.text}}</code></pre>
           </div>
         </div>
 

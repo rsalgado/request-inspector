@@ -29,13 +29,26 @@ let app = new Vue({
     },
 
     isJSON(request) {
-      let contentType = request.headers["content-type"];
+      let contentType = request.headers["content-type"] || "";
       return contentType === "application/json";
     },
 
     isForm(request) {
-      let contentType = request.headers["content-type"];
+      let contentType = request.headers["content-type"] || "";
       return contentType === "application/x-www-form-urlencoded";
+    },
+
+    isText(request) {
+      let contentType = request.headers["content-type"] || "";
+      return contentType.startsWith("text/");
+    },
+
+    getTextType(request) {
+      let contentType = request.headers["content-type"];
+      let textType = contentType.split("/")[1];
+      
+      if (textType === "*") return "plain";
+      else  return textType;
     }
   }
 });
