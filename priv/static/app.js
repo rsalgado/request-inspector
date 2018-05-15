@@ -1,5 +1,9 @@
-var app = new Vue({
+let app = new Vue({
   el: "#app",
+
+  created() {
+    this.loadRequests();
+  },
 
   data() {
     return {
@@ -11,10 +15,6 @@ var app = new Vue({
     numRequests() {
       return this.requests.length;
     }
-  },
-
-  created() {
-    this.loadRequests();
   },
 
   methods: {

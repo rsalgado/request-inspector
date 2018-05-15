@@ -14,43 +14,43 @@
     <ul class="requests-list">
       <li v-for="request in requests" :key="request.id" class="request-item">
         <div class="request-block">
-          <div class="request-id">{{request.id}}</div>
-          <div class="request-method">{{request.method}}</div>
-          <div class="request-path">{{request.path}}</div>
-          <div class="request-time">{{request.time}}</div>
+          <div class="id">{{request.id}}</div>
+          <div class="method">{{request.method}}</div>
+          <div class="path">{{request.path}}</div>
+          <div class="time">{{request.time}}</div>
         </div>
 
         <!-- Query Params -->
-        <div class="request-query request-block">
-          <div class="section-heading">Query Params</div>
-          <ul class="query-list">
-            <li v-for="(value, name) in request.queryParams" class="query-item">
-              <div class="param-name">{{name}}:</div>
+        <div class="request-block" id="request-query">
+          <div class="heading">Query Params</div>
+          <ul class="block-list">
+            <li v-for="(value, name) in request.queryParams" class="list-item -sans">
+              <div class="name">{{name}}:</div>
               {{value}}
             </li>
           </ul>
         </div>
 
         <!-- Headers -->
-        <div class="request-headers request-block">
-          <div class="section-heading">Headers</div>
-          <ul class="headers-list">
-            <li v-for="(value, name) in request.headers" class="header-item">
-              <div class="header-name">{{name}}:</div>
+        <div class="request-block" id="request-headers">
+          <div class="heading">Headers</div>
+          <ul class="block-list">
+            <li v-for="(value, name) in request.headers" class="list-item">
+              <div class="name">{{name}}:</div>
               {{value}}
             </li>
           </ul>
         </div>
 
         <!-- Body -->
-        <div class="request-body request-block">
-          <div class="section-heading">Body</div>
+        <div class="request-block" id="request-body">
+          <div class="heading">Body</div>
 
           <!-- Show form params (payload) info -->
           <div v-if="isForm(request)">
-            <ul class="body-params-list">
-              <li v-for="(value, name) in request.body" class="param-item">
-                <div class="param-name">{{name}}:</div>
+            <ul class="block-list">
+              <li v-for="(value, name) in request.body" class="list-item">
+                <div class="name">{{name}}:</div>
                 {{value}}
               </li>
             </ul>

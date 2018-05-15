@@ -25,45 +25,45 @@ body {
   border-top: 1px solid #ccc;
 }
 
-.request-block:first-child {
-  border-top: none;
-  display: flex;
-  align-items: center;
-}
+  .request-block:first-child {
+    border-top: none;
+    display: flex;
+    align-items: center;
+  }
 
-.request-id {
-  width: 3rem;
-  padding: 0.25rem 0;
-  background: #000;
-  color: #fff;
-  text-align: center;
-  margin-right: 1.5rem;
-  border-radius: 0.25rem;
-  font-size: 1.125rem;
-}
+  .request-block > .id {
+    width: 3rem;
+    padding: 0.25rem 0;
+    background: #000;
+    color: #fff;
+    text-align: center;
+    margin-right: 1.5rem;
+    border-radius: 0.25rem;
+    font-size: 1.125rem;
+  }
 
-.request-method {
-  font-weight: bold;
-  font-size: 1.5rem;
-  margin-right: 1rem;
-}
+  .request-block > .method {
+    font-weight: bold;
+    font-size: 1.5rem;
+    margin-right: 1rem;
+  }
 
-.request-path {
-  font-size: 1rem;
-  flex-grow: 1;
-  font-size: 1.5rem;
-}
+  .request-block > .path {
+    font-size: 1rem;
+    flex-grow: 1;
+    font-size: 1.5rem;
+  }
 
-.request-time {
-  color: #777;
-}
+  .request-block > .time {
+    color: #777;
+  }
 
-.section-heading {
-  font-weight: bold;
-  font-size: 1.125rem;
-}
+  .request-block > .heading {
+    font-weight: bold;
+    font-size: 1.125rem;
+  }
 
-.headers-list {
+.block-list {
   list-style-type: none;
   padding-left: 1rem;
   display: flex;
@@ -71,13 +71,17 @@ body {
   justify-content: space-between;
 }
 
-.header-item {
-  margin-top: 0.75rem;
-  font-family: monospace;
-  flex-basis: 47.5%;
-}
+  .block-list > .list-item {
+    margin-top: 0.75rem;
+    font-family: monospace;
+    flex-basis: 47.5%;
+  }
 
-.header-name {
+  .block-list > .list-item.-sans {
+    font-family: sans-serif;
+  }
+
+.list-item > .name {
   font-weight: bold;
 }
 
@@ -86,38 +90,6 @@ body {
   padding: 1rem;
   border-radius: 0.25rem;
   overflow-x: auto;
-}
-
-.query-list {
-  list-style-type: none;
-  padding-left: 1rem;
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
-}
-
-.query-item {
-  margin-top: 0.75rem;
-  font-family: sans-serif;
-  flex-basis: 47.5%;
-}
-
-.param-name {
-  font-weight: bold;
-}
-
-.body-params-list {
-  list-style-type: none;
-  padding-left: 1rem;
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
-}
-
-.param-item {
-  margin-top: 0.75rem;
-  font-family: monospace;
-  flex-basis: 47.5%;
 }
 
 
