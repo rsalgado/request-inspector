@@ -86,10 +86,19 @@ body {
 }
 
 .body-content {
-  background: rgba(0,0,0, 0.08);
-  padding: 1rem;
+  padding: 0.5rem;
   border-radius: 0.25rem;
   overflow-x: auto;
+  border: 1px solid #cccccc;
+  /* Default colors */
+  color: #444;
+  background: #f0f0f0;
+}
+
+.body-content code {
+  /* This is just for consistency with hljs default styles */
+  display: block;
+  padding: 0.5rem;
 }
 
 

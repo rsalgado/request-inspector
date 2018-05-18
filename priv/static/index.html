@@ -6,7 +6,12 @@
   <!-- Load vue.js and axios before rendering -->
   <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
   <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+
+  <!-- Load highlight.js -->
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.12.0/build/styles/default.min.css">
+  <script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.12.0/build/highlight.min.js"></script>
 </head>
+
 <body>
   <div id="app">
     <h1>{{numRequests}} Requests:</h1>
@@ -58,7 +63,7 @@
 
           <!-- Show JSON payload -->
           <div v-else-if="isJSON(request)">
-            <pre  class="body-content"><code class="json">{{request.body}}</code></pre>
+            <pre class="body-content"><code class="json">{{request.body}}</code></pre>
           </div>
 
           <!-- Show anything else as text (The server is parsing and putting any 'text/*' into body.text) -->

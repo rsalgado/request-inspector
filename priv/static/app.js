@@ -5,6 +5,12 @@ let app = new Vue({
     this.loadRequests();
   },
 
+  updated() {
+    this.$el.querySelectorAll("pre > code").forEach(block => {
+      hljs.highlightBlock(block);
+    });
+  },
+
   data() {
     return {
       requests: []
