@@ -89,10 +89,10 @@ body {
   padding: 0.5rem;
   border-radius: 0.25rem;
   overflow-x: auto;
-  border: 1px solid #cccccc;
+  border: 1px solid #dddddd;
   /* Default colors */
   color: #444;
-  background: #f0f0f0;
+  background: #f6f6f6;
 }
 
 .body-content code {

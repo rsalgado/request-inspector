@@ -13,6 +13,7 @@ It uses the following technologies:
 * **Poison**: for encoding/decoding between JSON and elixir maps.
 * **SSE**: for sending real-time notifications to browser that it should update (fetch data); it doesn't send the new data.
 * **Vue.js** & **axios**: for the front-end. The front-end is a simple Vue.js app (No Vue-CLI was used) that uses axios to fetch data from server.
+* **highlight.js**: for syntax highlighting of the requests bodies.
 
 Finally, the state (data) is kept in memory using Agents.
 
