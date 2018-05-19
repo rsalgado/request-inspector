@@ -92,13 +92,18 @@ body {
   border: 1px solid #dddddd;
   /* Default colors */
   color: #444;
-  background: #f6f6f6;
+  background: #f4f4f4;
 }
 
 .body-content code {
   /* This is just for consistency with hljs default styles */
   display: block;
   padding: 0.5rem;
+}
+
+/* Override default highlight background */
+.body-content .hljs {
+  background: none;
 }
 
 
