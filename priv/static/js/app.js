@@ -45,8 +45,9 @@ let app = new Vue({
     },
 
     isText(request) {
+      let textSubtypes = ["plain", "json", "xml", "html", "css", "javascript"];
       let contentType = request.headers["content-type"] || "";
-      return contentType.startsWith("text/");
+      return contentType.startsWith("text/") || textSubtypes.some(sub => contentType.endsWith(sub));
     },
 
     getTextType(request) {

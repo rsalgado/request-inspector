@@ -5,6 +5,7 @@ defmodule RequestInspector.Router do
   require IEx
 
   use Plug.Router
+  use Plug.Debugger   # This should be only used for development.
 
 
   plug(
@@ -15,7 +16,7 @@ defmodule RequestInspector.Router do
 
   plug(
     Plug.Parsers,
-    parsers: [:urlencoded, :multipart, :json, RequestsInspector.Parsers.Text],
+    parsers: [:urlencoded, :multipart, :json, RequestInspector.Parsers.Text],
     json_decoder: Poison
   )
 
