@@ -48,9 +48,9 @@ defmodule RequestInspector.Router do
     # Store and encode request
     json_response =
       conn
-      |> parse_request()
+      |> parse_request()                # Parse request into a map
       |> RequestsAgent.store_request()  # Store the request
-      |> Poison.encode!(pretty: true)   # Create a JSON string with it
+      |> Poison.encode!(pretty: true)   # Create a JSON string with the request
 
     # Notify update to browser
     notify_update()
@@ -66,17 +66,12 @@ defmodule RequestInspector.Router do
     # Store current connection's process ID
     StreamAgent.set_connection_pid(self())
 
-    # Send initial response to open the stream
-    conn =
-      conn
+    # Send initial response to open the stream and then, start the loop streaming events to browser
+    # Return the connection when the loop is over: stream_loop returns the connection.
+    conn
       |> put_resp_header("content-type", "text/event-stream")
       |> send_chunked(200)
-
-    # Start streaming events to browser
-    stream_loop(conn)
-
-    # Return the connection
-    conn
+      |> stream_loop()
   end
 
   # Default endpoint (matches anything else)
@@ -85,6 +80,8 @@ defmodule RequestInspector.Router do
     send_resp(conn, 404, "Oops! Invalid request. Try again.")
   end
 
+
+  # Private functions
 
   # Build a map using the request info from the connection
   defp parse_request(connection) do
@@ -95,6 +92,14 @@ defmodule RequestInspector.Router do
       body: connection.body_params,
       headers: Map.new(connection.req_headers, & &1)
     }
+  end
+
+  # Send message to process (PID) to trigger notification
+  defp notify_update() do
+    conn_pid = StreamAgent.get_connection_pid()
+    if conn_pid do 
+      send(conn_pid, :notify)
+    end
   end
 
   # Listen to internal messages to current connection's process
@@ -113,22 +118,17 @@ defmodule RequestInspector.Router do
             stream_loop(conn)
 
           _ ->
+            # Chunk couldn't be sent. Break the loop. Return the connection.
             Logger.warn("Unable to send chunk. Stream is getting closed.")
-            send(self(), :close_stream)   # Send :close_stream message to itself
+            conn
         end
       
       :close_stream ->
-        # Close the stream (and break the loop)
-        # This can also be used to close connection from iex or another place
+        # Close the stream (and break the loop). Return the connection
+        # This can be used to close connection from iex or another place
         Logger.warn("Stream closed")
+        conn
     end
   end
 
-  # Send message to process (PID) to trigger notification
-  defp notify_update() do
-    conn_pid = StreamAgent.get_connection_pid()
-    if conn_pid do 
-      send(conn_pid, :notify)
-    end
-  end
 end
