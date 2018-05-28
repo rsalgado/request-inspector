@@ -1,6 +1,6 @@
 defmodule RequestInspector.RequestsAgentTest do
   alias RequestInspector.RequestsAgent
-  use ExUnit.Case, async: true
+  use ExUnit.Case
 
   setup do
     {:ok, agent} = RequestsAgent.start_link []
