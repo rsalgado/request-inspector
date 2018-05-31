@@ -2,6 +2,11 @@ defmodule RequestInspector.StreamAgentTest do
   alias RequestInspector.StreamAgent
   use ExUnit.Case
 
+  setup_all do
+    Application.stop(:request_inspector)
+    :ok
+  end
+
   setup do
     {:ok, agent} = StreamAgent.start_link []
     %{agent: agent}
