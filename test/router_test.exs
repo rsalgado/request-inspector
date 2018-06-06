@@ -5,11 +5,6 @@ defmodule RequestInspector.RouterTest do
 
   @opts Router.init([])
 
-  setup do
-    Application.ensure_all_started(:request_inspector)
-    :ok
-  end
-
   test "GET / returns the index.html page" do
     root_conn = 
       conn(:get, "/", "")

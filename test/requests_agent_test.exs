@@ -1,11 +1,6 @@
 defmodule RequestInspector.RequestsAgentTest do
   alias RequestInspector.RequestsAgent
-  use ExUnit.Case
-
-  setup_all do
-    Application.stop(:request_inspector)
-    :ok
-  end
+  use ExUnit.Case, async: true
 
   setup do
     {:ok, agent} = RequestsAgent.start_link []
@@ -18,10 +13,10 @@ defmodule RequestInspector.RequestsAgentTest do
     assert Agent.get(agent, & &1) == initial_state
   end
 
-  test "Stores request", %{agent: _agent} do
+  test "Stores request", %{agent: agent} do
     request = %{method: "GET"}
-    RequestsAgent.store_request(request)
-    requests = RequestsAgent.get_requests()
+    RequestsAgent.store_request(request, agent)
+    requests = RequestsAgent.get_requests(agent)
     assert length(requests) == 1
 
     [first_request] = requests
@@ -30,10 +25,10 @@ defmodule RequestInspector.RequestsAgentTest do
     assert Map.has_key?(first_request, :time) == true
   end
 
-  test "Increases id number", %{agent: _agent} do
-    RequestsAgent.new_id()
-    RequestsAgent.new_id()
-    id = RequestsAgent.new_id()
+  test "Increases id number", %{agent: agent} do
+    RequestsAgent.new_id(agent)
+    RequestsAgent.new_id(agent)
+    id = RequestsAgent.new_id(agent)
     assert id == 2
   end
 

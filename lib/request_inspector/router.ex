@@ -7,6 +7,10 @@ defmodule RequestInspector.Router do
   use Plug.Router
   use Plug.Debugger   # This should be only used for development.
 
+  # Use the names of the modules as the names of the agents
+  @requests_agent   RequestsAgent
+  @stream_agent     StreamAgent
+  
 
   plug(
     Plug.Static,
@@ -35,7 +39,8 @@ defmodule RequestInspector.Router do
   # See (inspect) all the requests you have made to /endpoint
   get "/requests" do
     json_response =
-      RequestsAgent.get_requests()
+      @requests_agent
+      |> RequestsAgent.get_requests()
       |> Poison.encode!(pretty: true)
 
     conn
@@ -48,9 +53,9 @@ defmodule RequestInspector.Router do
     # Store and encode request
     json_response =
       conn
-      |> parse_request()                # Parse request into a map
-      |> RequestsAgent.store_request()  # Store the request
-      |> Poison.encode!(pretty: true)   # Create a JSON string with the request
+      |> parse_request()                                # Parse request into a map
+      |> RequestsAgent.store_request(@requests_agent)   # Store the request
+      |> Poison.encode!(pretty: true)                   # Create a JSON string with the request
 
     # Notify update to browser
     notify_update()
@@ -64,7 +69,7 @@ defmodule RequestInspector.Router do
   # SSE endpoint
   get "/sse" do
     # Store current connection's process ID
-    StreamAgent.set_connection_pid(self())
+    StreamAgent.set_connection_pid(self(), @stream_agent)
 
     # Send initial response to open the stream and then, start the loop streaming events to browser
     # Return the connection when the loop is over: stream_loop returns the connection.
@@ -96,7 +101,7 @@ defmodule RequestInspector.Router do
 
   # Send message to process (PID) to trigger notification
   defp notify_update() do
-    conn_pid = StreamAgent.get_connection_pid()
+    conn_pid = StreamAgent.get_connection_pid(@stream_agent)
     if conn_pid do 
       send(conn_pid, :notify)
     end

@@ -6,9 +6,11 @@ defmodule RequestInspector do
   require Logger
 
   def start(_type, _args) do
+    # Use the modules names as agents' names. 
+    # Also used in `RequestInspector.Router` attributes
     children = [
-      RequestsAgent.child_spec([]),
-      StreamAgent.child_spec([]),
+      RequestsAgent.child_spec(name: RequestsAgent),
+      StreamAgent.child_spec(name: StreamAgent),
       Plug.Adapters.Cowboy.child_spec(:http, RequestInspector.Router, [], port: 5000)
     ]
 
