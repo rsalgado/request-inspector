@@ -8,7 +8,7 @@ defmodule RequestInspector.RequestsAgent do
   use Agent
 
   def start_link(opts) do
-    Logger.info("Starting RequestsAgent")
+    Logger.debug("Starting requests agent")
     Agent.start_link(fn -> %{counter: 0, requests: []} end, opts)
   end
 
@@ -36,7 +36,7 @@ defmodule RequestInspector.RequestsAgent do
     end)
 
     count = Agent.get(agent, fn(%{counter: cnt}) -> cnt end)
-    Logger.info("RequestsAgent agent length: #{count} items")
+    Logger.debug("RequestsAgent #{inspect self()} length: #{count} items")
     # Return updated request (with id and time)
     updated_req
   end

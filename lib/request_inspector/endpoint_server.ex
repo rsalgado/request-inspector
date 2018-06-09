@@ -1,8 +1,9 @@
 defmodule RequestInspector.EndpointServer do
+  require Logger
   use GenServer
 
-  def start_link(args) do
-    GenServer.start_link(__MODULE__, args)
+  def start_link(args, opts \\ []) do
+    GenServer.start_link(__MODULE__, args, opts)
   end
 
   def get_requests_agent(gen_server) do
@@ -14,8 +15,8 @@ defmodule RequestInspector.EndpointServer do
   end
 
 
-
-  def init(args) do
+  def init(_args) do
+    Logger.info("Starting EndpointServer #{inspect self()}")
     {:ok, req_agent} = RequestInspector.RequestsAgent.start_link []
     {:ok, stream_agent} = RequestInspector.StreamAgent.start_link []
 
@@ -23,12 +24,12 @@ defmodule RequestInspector.EndpointServer do
     {:ok, state}
   end
 
-  def handle_call(:get_req_agent, _from,  {req_agent, stream_agent} = state) do
+  def handle_call(:get_req_agent, _from,  {req_agent, _stream_agent} = state) do
     response = {:ok, req_agent}
     {:reply, response, state}
   end
 
-  def handle_call(:get_stream_agent, _from, {req_agent, stream_agent} = state) do
+  def handle_call(:get_stream_agent, _from, {_req_agent, stream_agent} = state) do
     response = {:ok, stream_agent}
     {:reply, response, state}
   end

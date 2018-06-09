@@ -8,7 +8,7 @@ defmodule RequestInspector.StreamAgent do
   use Agent
 
   def start_link(opts) do
-    Logger.info("Starting stream agent")
+    Logger.debug("Starting stream agent")
     Agent.start_link(fn -> nil end, opts)
   end
 
@@ -18,7 +18,7 @@ defmodule RequestInspector.StreamAgent do
   @spec set_connection_pid(pid, pid) :: pid
   def set_connection_pid(new_pid, agent) do
     Agent.update(agent, fn _ -> new_pid end)
-    Logger.info("Stream agent updated")
+    Logger.debug("StreamAgent #{inspect self()} updated")
     new_pid
   end
 
