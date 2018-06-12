@@ -8,12 +8,18 @@ defmodule RequestInspector.StreamAgent do
     Agent.start_link(fn -> nil end, opts)
   end
 
+  @doc """
+  Sets the PID of the `agent`
+  """
   def set_connection_pid(new_pid, agent) do
     Agent.update(agent, fn _ -> new_pid end)
     Logger.info("Stream agent updated")
     new_pid
   end
 
+  @doc """
+  Gets the PID in the `agent`. If there's none (`nil`) or if the process is dead, returns `nil`
+  """
   def get_connection_pid(agent) do
     conn_pid = Agent.get(agent, & &1)
     

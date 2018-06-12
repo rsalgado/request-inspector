@@ -8,11 +8,14 @@ defmodule RequestInspector.RequestsAgent do
     Agent.start_link(fn -> %{counter: 0, requests: []} end, opts)
   end
 
+  @doc """
+  Takes a map (with the request info), adds an `:id` and `:time` timestamp to it, and stores it
+  at the top of the `:requests` list in the `agent`
+  """
   def store_request(request, agent) do
-    # Use the number of items as id for the request 
-    # and store it at the top of the list with the current time
+    # Get a new id for the request
     id = new_id(agent)
-
+    # and store it at the top of the list with the current time
     time = DateTime.utc_now() 
             |> DateTime.truncate(:millisecond)
             |> DateTime.to_iso8601()
@@ -37,6 +40,9 @@ defmodule RequestInspector.RequestsAgent do
     Agent.get(agent, fn(%{requests: reqs}) ->  reqs end)
   end
 
+  @doc """
+  Generates a new id. This *both* gets and updates the incremental `:counter` used for ids
+  """
   def new_id(agent) do
     Agent.get_and_update(agent, fn(map) ->
       counter = Map.get(map, :counter)

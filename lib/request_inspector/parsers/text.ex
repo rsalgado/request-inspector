@@ -1,4 +1,3 @@
-# Custom parser for dealing with text
 defmodule RequestInspector.Parsers.Text do
   @behaviour Plug.Parsers
 
@@ -7,8 +6,9 @@ defmodule RequestInspector.Parsers.Text do
 
   def init(opts), do: opts
 
-  # Parse text requests by extracting the body as a string and putting it in a
-  # dictionary with the key: :text
+  @doc """
+  Parse text requests by extracting the body as a string and putting it in a dictionary with the key: :text
+  """
   def parse(conn, type, subtype, _headers, _opts) do
     # Try to handle content as text, or, move on to the next parser
     if is_text?(type, subtype) do
