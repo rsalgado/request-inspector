@@ -21,6 +21,7 @@ defmodule RequestInspector.Parsers.Text do
     end
   end
 
+  @spec is_text?(String.t, String.t) :: boolean
   defp is_text?(type, subtype) do
     valid_subtypes = ["plain", "json", "xml", "html", "css", "javascript"]
     type == "text"  ||  subtype in valid_subtypes

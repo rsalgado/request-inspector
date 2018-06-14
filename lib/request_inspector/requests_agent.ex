@@ -1,4 +1,8 @@
 defmodule RequestInspector.RequestsAgent do
+  @moduledoc """
+  Agent for storing (in memory) the requests made to the endpoint
+  """
+
   require Logger
 
   use Agent
@@ -12,6 +16,7 @@ defmodule RequestInspector.RequestsAgent do
   Takes a map (with the request info), adds an `:id` and `:time` timestamp to it, and stores it
   at the top of the `:requests` list in the `agent`
   """
+  @spec store_request(map, pid) :: map
   def store_request(request, agent) do
     # Get a new id for the request
     id = new_id(agent)
@@ -36,6 +41,7 @@ defmodule RequestInspector.RequestsAgent do
     updated_req
   end
 
+  @spec get_requests(pid) :: [map]
   def get_requests(agent) do
     Agent.get(agent, fn(%{requests: reqs}) ->  reqs end)
   end
@@ -43,6 +49,7 @@ defmodule RequestInspector.RequestsAgent do
   @doc """
   Generates a new id. This *both* gets and updates the incremental `:counter` used for ids
   """
+  @spec new_id(pid) :: integer
   def new_id(agent) do
     Agent.get_and_update(agent, fn(map) ->
       counter = Map.get(map, :counter)

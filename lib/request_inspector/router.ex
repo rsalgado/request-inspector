@@ -1,4 +1,16 @@
 defmodule RequestInspector.Router do
+  @moduledoc """
+  Plug Router for handling all the HTTP requests: serving the static files (like the index.html page),
+  handling the HTTP requests made to the endpoint, getting the list of requests made, and handling SSE.
+
+  ## Routes (Endpoints)
+
+      GET  /             Serves priv/static/index.html. Equivalent to GET /index.html
+      GET  /requests     See (inspect) all the requests you have made to /endpoint
+      *    /endpoint     Endpoint (send your requests here)
+      GET  /sse          SSE endpoint
+  """
+
   alias RequestInspector.RequestsAgent
   alias RequestInspector.StreamAgent
   require Logger
@@ -89,6 +101,7 @@ defmodule RequestInspector.Router do
   # Private functions
 
   # Build a map using the request info from the connection
+  @spec parse_request(Plug.Conn.t) :: map
   defp parse_request(connection) do
     %{
       method: connection.method,
@@ -108,6 +121,7 @@ defmodule RequestInspector.Router do
   end
 
   # Listen to internal messages to current connection's process
+  @spec stream_loop(Plug.Conn.t) :: Plug.Conn.t
   defp stream_loop(conn) do
     # Text to be sent as SSE chunk
     message_data = "updated"
