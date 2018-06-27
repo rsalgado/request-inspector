@@ -33,4 +33,10 @@ defmodule RequestInspector.EndpointServer do
     response = {:ok, stream_agent}
     {:reply, response, state}
   end
+
+  def generate_key(n \\ 8) do
+    '0123456789abcdefghijklmnopqrstuvwxyz'
+    |> Enum.take_random(n)
+    |> List.to_string()
+  end
 end
