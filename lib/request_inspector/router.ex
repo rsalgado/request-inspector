@@ -11,20 +11,12 @@ defmodule RequestInspector.Router do
       GET  /:key/sse          SSE endpoint
   """
 
-  alias RequestInspector.RequestsAgent
-  alias RequestInspector.StreamAgent
-  alias RequestInspector.EndpointServer
-
+  alias RequestInspector.{RequestsAgent, StreamAgent, EndpointServer}
   require Logger
-  require IEx
 
   use Plug.Router
   use Plug.Debugger   # This should be only used for development.
 
-  # Use the names of the modules as the names of the agents
-  @requests_agent   RequestsAgent
-  @stream_agent     StreamAgent
-  
 
   plug(
     Plug.Static,

@@ -5,9 +5,21 @@ defmodule RequestInspector.RouterTest do
 
   @opts Router.init([])
 
-  test "GET / returns the index.html page" do
+  test "POST /keys creates a new GenServer with a random string as key" do
+    initial_conn = 
+      conn(:post, "/keys")
+      |> Router.call(@opts)
+    response_map = Poison.decode!(initial_conn.resp_body)
+    
+    assert initial_conn.status == 201
+    assert Map.has_key?(response_map, "key")
+  end
+
+  test "GET /:key returns the index.html page" do
+    random_key = create_key()
+
     root_conn = 
-      conn(:get, "/", "")
+      conn(:get, "/#{random_key}", "")
       |> Router.call(@opts)
 
     index_conn =
@@ -23,10 +35,12 @@ defmodule RequestInspector.RouterTest do
     assert root_conn.resp_body == index_conn.resp_body
   end
 
-  test "GET /requests returns the requests made to the endpoint" do
+  test "GET /:key/requests returns the requests made to the endpoint" do
+    random_key = create_key()
+
     # Initial requests list is empty
     initial_conn =
-      conn(:get, "/requests", "")
+      conn(:get, "/#{random_key}/requests", "")
       |> Router.call(@opts)
 
     assert initial_conn.status == 200
@@ -35,14 +49,14 @@ defmodule RequestInspector.RouterTest do
 
     # Make a request to the endpoint
     endpoint_conn =
-      conn(:get, "/endpoint?foo=bar", "")
+      conn(:get, "/#{random_key}/endpoint?foo=bar", "")
       |> Router.call(@opts)
 
     assert endpoint_conn.status == 200
 
     # Now the requests list includes the request made
     updated_conn =
-      conn(:get, "/requests", "")
+      conn(:get, "/#{random_key}/requests", "")
       |> Router.call(@opts)
 
     requests = Poison.decode!(updated_conn.resp_body)
@@ -50,7 +64,17 @@ defmodule RequestInspector.RouterTest do
 
     assert length(requests) == 1
     assert single_req |> Map.get("method") == "GET"
-    assert single_req |> Map.get("path") == "/endpoint"
+    assert single_req |> Map.get("path") == "/#{random_key}/endpoint"
     assert single_req |> Map.get("queryParams") == %{"foo" => "bar"}
+  end
+
+
+  defp create_key() do
+    initial_conn =
+      conn(:post, "/keys")
+      |> Router.call(@opts)
+
+    response_map = Poison.decode!(initial_conn.resp_body)
+    Map.get(response_map, "key")
   end
 end

@@ -6,12 +6,21 @@ defmodule RequestInspector.EndpointServer do
     GenServer.start_link(__MODULE__, args, opts)
   end
 
+  @spec get_requests_agent(pid) :: pid
   def get_requests_agent(gen_server) do
     GenServer.call(gen_server, :get_req_agent)
   end
 
+  @spec get_stream_agent(pid) :: pid
   def get_stream_agent(gen_server) do
     GenServer.call(gen_server, :get_stream_agent)
+  end
+
+  @spec generate_key(integer) :: String.t
+  def generate_key(n \\ 8) do
+    '0123456789abcdefghijklmnopqrstuvwxyz'
+    |> Enum.take_random(n)
+    |> List.to_string()
   end
 
 
@@ -37,11 +46,5 @@ defmodule RequestInspector.EndpointServer do
   def handle_call(:get_stream_agent, _from, {_req_agent, stream_agent} = state) do
     response = {:ok, stream_agent}
     {:reply, response, state}
-  end
-
-  def generate_key(n \\ 8) do
-    '0123456789abcdefghijklmnopqrstuvwxyz'
-    |> Enum.take_random(n)
-    |> List.to_string()
   end
 end
