@@ -5,14 +5,16 @@ defmodule RequestInspector.Router do
 
   ## Routes (Endpoints)
 
-      GET  /             Serves priv/static/index.html. Equivalent to GET /index.html
-      GET  /requests     See (inspect) all the requests you have made to /endpoint
-      *    /endpoint     Endpoint (send your requests here)
-      GET  /sse          SSE endpoint
+      GET  /:key              Serves priv/static/index.html. Equivalent to GET /index.html
+      GET  /:key/requests     See (inspect) all the requests you have made to /endpoint
+      *    /:key/endpoint     Endpoint (send your requests here)
+      GET  /:key/sse          SSE endpoint
   """
 
   alias RequestInspector.RequestsAgent
   alias RequestInspector.StreamAgent
+  alias RequestInspector.EndpointServer
+
   require Logger
   require IEx
 
@@ -42,46 +44,73 @@ defmodule RequestInspector.Router do
 
   ## Endpoints
 
-  get "/" do
-    conn
-    |> put_resp_header("content-type", "text-html")
-    |> send_file(200, "priv/static/index.html")
+  post "/keys" do
+    new_key = EndpointServer.generate_key()
+    gs_name = {:via, Registry, {:endpoint_servers, new_key}}
+
+    conn = put_resp_header(conn, "content-type", "application/json")    
+    case EndpointServer.start_link([], name: gs_name) do
+      {:ok, _} ->
+        json_response = Poison.encode!(%{key: new_key}, pretty: true)
+        send_resp(conn, 201, json_response)
+      
+      _ ->
+        json_response = Poison.encode!(%{error: "Couldn't create GenServer"}, pretty: true)
+        send_resp(conn, 400, json_response)
+    end
   end
 
   # See (inspect) all the requests you have made to /endpoint
-  get "/requests" do
-    json_response =
-      @requests_agent
-      |> RequestsAgent.get_requests()
-      |> Poison.encode!(pretty: true)
+  get "/:key/requests" do
+    conn = put_resp_header(conn, "content-type", "application/json")
+    case Registry.lookup(:endpoint_servers, key) do
+      [{gen_server, nil}] ->
+        {:ok, requests_agent} = EndpointServer.get_requests_agent(gen_server)
+        json_response =
+          requests_agent
+          |> RequestsAgent.get_requests()
+          |> Poison.encode!(pretty: true)
 
-    conn
-    |> put_resp_header("content-type", "application/json")
-    |> send_resp(200, json_response)
+        send_resp(conn, 200, json_response)
+      
+      _ ->
+        json_response = Poison.encode!(%{error: "Key not found"}, pretty: true)
+        send_resp(conn, 400, json_response)
+    end
   end
 
   # Endpoint (send your requests here)
-  match "/endpoint" do
-    # Store and encode request
-    json_response =
-      conn
-      |> parse_request()                                # Parse request into a map
-      |> RequestsAgent.store_request(@requests_agent)   # Store the request
-      |> Poison.encode!(pretty: true)                   # Create a JSON string with the request
+  match "/:key/endpoint" do
+    conn = put_resp_header(conn, "content-type", "application/json")
+    case Registry.lookup(:endpoint_servers, key) do
+      [{gen_server, nil}] ->
+        {:ok, requests_agent} = EndpointServer.get_requests_agent(gen_server)
+        {:ok, stream_agent} = EndpointServer.get_stream_agent(gen_server)
 
-    # Notify update to browser
-    notify_update()
+        # Store and encode request
+        json_response =
+          conn
+          |> parse_request()                                # Parse request into a map
+          |> RequestsAgent.store_request(requests_agent)    # Store the request
+          |> Poison.encode!(pretty: true)                   # Create a JSON string with the request
+        # Notify update to browser
+        notify_update(stream_agent)
+        # Respond with request info as a JSON
+        send_resp(conn, 200, json_response)
 
-    # Respond with request info as a JSON
-    conn
-    |> put_resp_header("content-type", "application/json")
-    |> send_resp(200, json_response)
+      _ ->
+        json_response = Poison.encode!(%{error: "Key not found"}, pretty: true)
+        send_resp(conn, 400, json_response)
+    end
   end
 
   # SSE endpoint
-  get "/sse" do
+  get "/:key/sse" do
+    [{gen_server, nil}] = Registry.lookup(:endpoint_servers, key)
+    {:ok, stream_agent} = EndpointServer.get_stream_agent(gen_server)
+
     # Store current connection's process ID
-    StreamAgent.set_connection_pid(self(), @stream_agent)
+    StreamAgent.set_connection_pid(self(), stream_agent)
 
     # Send initial response to open the stream and then, start the loop streaming events to browser
     # Return the connection when the loop is over: stream_loop returns the connection.
@@ -89,6 +118,19 @@ defmodule RequestInspector.Router do
       |> put_resp_header("content-type", "text/event-stream")
       |> send_chunked(200)
       |> stream_loop()
+  end
+
+  get "/:key" do
+    case Registry.lookup(:endpoint_servers, key) do
+      [{gen_server, nil}] ->
+        conn
+        |> put_resp_header("content-type", "text-html")
+        |> send_file(200, "priv/static/index.html")
+      
+      _ ->
+        Logger.warn("#{conn.method} request to #{conn.request_path}")
+        send_resp(conn, 400, "Key not found")
+    end
   end
 
   # Default endpoint (matches anything else)
@@ -113,8 +155,8 @@ defmodule RequestInspector.Router do
   end
 
   # Send message to process (PID) to trigger notification
-  defp notify_update() do
-    conn_pid = StreamAgent.get_connection_pid(@stream_agent)
+  defp notify_update(stream_agent) do
+    conn_pid = StreamAgent.get_connection_pid(stream_agent)
     if conn_pid do 
       send(conn_pid, :notify)
     end

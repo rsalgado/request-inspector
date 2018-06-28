@@ -1,8 +1,38 @@
+function getKeyFromPath() {
+  return window.location.pathname.split("/")[1];
+}
+
+// SSE client functionality (wrapped for convenience to avoid namespace issues)
+function startSSE() {
+  let key = getKeyFromPath();
+  let source = new EventSource(`/${key}/sse`);
+
+  source.addEventListener("message", function(event) {
+    console.log(`Received event: ${event}`);
+
+    // Make the Vue app reload the requests when there was an update
+    if (event.data === "updated") {
+      app.loadRequests();
+    }
+  }, false);
+
+  source.addEventListener("open", function(event) {
+    console.log("EventSource connected.");
+  }, false);
+
+  source.addEventListener("error", function(event) {
+    if (event.eventPhase == EventSource.CLOSED) 
+      console.log("EventSource was closed.");
+  }, false);
+};
+
+
 let app = new Vue({
   el: "#app",
 
   created() {
     this.loadRequests();
+    startSSE();
   },
 
   updated() {
@@ -27,8 +57,9 @@ let app = new Vue({
     // Load requests from backend
     loadRequests() {
       let self = this;
-      
-      axios.get("/requests")
+      let key = getKeyFromPath();
+
+      axios.get(`/${key}/requests`)
         .then(function(resp) {
           self.requests = resp.data;
         });
@@ -59,26 +90,3 @@ let app = new Vue({
     }
   }
 });
-
-// SSE client functionality (wrapped for convenience to avoid namespace issues)
-(function() {
-  let source = new EventSource("/sse");
-
-  source.addEventListener("message", function(event) {
-    console.log(`Received event: ${event}`);
-
-    // Make the Vue app reload the requests when there was an update
-    if (event.data === "updated") {
-      app.loadRequests();
-    }
-  }, false);
-
-  source.addEventListener("open", function(event) {
-    console.log("EventSource connected.");
-  }, false);
-
-  source.addEventListener("error", function(event) {
-    if (event.eventPhase == EventSource.CLOSED) 
-      console.log("EventSource was closed.");
-  }, false);
-})();

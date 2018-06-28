@@ -9,9 +9,10 @@ defmodule RequestInspector do
     # Use the modules names as agents' names. 
     # Also used in `RequestInspector.Router` attributes
     children = [
-      RequestsAgent.child_spec(name: RequestsAgent),
-      StreamAgent.child_spec(name: StreamAgent),
-      Plug.Adapters.Cowboy.child_spec(:http, RequestInspector.Router, [], port: 5000)
+#      RequestsAgent.child_spec(name: RequestsAgent),
+#      StreamAgent.child_spec(name: StreamAgent),
+      Plug.Adapters.Cowboy.child_spec(:http, RequestInspector.Router, [], port: 5000),
+      Registry.child_spec(keys: :unique, name: :endpoint_servers)
     ]
 
     Logger.info("Starting server on port 5000")

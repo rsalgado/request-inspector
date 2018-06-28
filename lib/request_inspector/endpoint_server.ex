@@ -24,6 +24,11 @@ defmodule RequestInspector.EndpointServer do
     {:ok, state}
   end
 
+  def terminate(_reason, {req_agent, stream_agent}) do
+    Agent.stop(req_agent)
+    Agent.stop(stream_agent)
+  end
+
   def handle_call(:get_req_agent, _from,  {req_agent, _stream_agent} = state) do
     response = {:ok, req_agent}
     {:reply, response, state}
