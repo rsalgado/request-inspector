@@ -8,6 +8,53 @@ body {
   min-width: 450px;
 }
 
+a {
+  text-decoration: none;
+  color: #26a;
+}
+
+.jumbo-section {
+  padding: 1rem;
+  margin: 1rem;
+  background: #f4f4f4;
+  border-radius: 0.5rem;
+}
+
+
+.input-group {
+  display: flex;
+  flex-direction: row;
+}
+  .input-group > .left {
+    border-radius: 8px 0 0 8px;
+  }
+  .input-group > .right {
+    border-radius: 0 8px 8px 0;
+  }
+
+  .input-group > .button {
+    background: #000;
+    font-size: 1.5rem;
+    color: white;
+    border: none;
+    padding: 0.5rem 0.75rem;
+  }
+
+  .input-group > .button[disabled="disabled"] {
+    background: #666;
+    color: #ddd;
+  }
+
+  .input-group > .box {
+    background: white;
+    flex-grow: 1;
+    max-width: 20rem;
+    padding: 0.5rem 0.75rem;
+    font-size: 1.5rem;
+    font-weight: bold;
+  }
+
+
 .requests-list {
   list-style-type: none;
   padding-left: 0;

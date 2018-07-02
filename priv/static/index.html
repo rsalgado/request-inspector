@@ -14,68 +14,95 @@
 
 <body>
   <div id="app">
-    <h1>{{numRequests}} Requests:</h1>
+    <index-section v-if="isRootPage"></index-section>
+    <requests-section v-else></requests-section>
+  </div>
+  
+  <!-- Index section (index-section) component template -->
+  <template id="index-section">
+    <div class="jumbo-section">
+      <h1 class="heading">Welcome to Requests Inspector</h1>
+      <div class="input-group">
+        <button class="button left"
+          :disabled="hasEndpointKey"
+          @click="getEndpointKey()">Give me a new key!</button>
+          
+          <div class="right box">
+            <a :href="endpointKey">/{{endpointKey}}</a>
+          </div>
+      </div>
+    </div>
+  </template>
 
-    <ul class="requests-list">
-      <li v-for="request in requests" :key="request.id" class="request-item">
-        <div class="request-block">
-          <div class="id">{{request.id}}</div>
-          <div class="method">{{request.method}}</div>
-          <div class="path">{{request.path}}</div>
-          <div class="time">{{request.time}}</div>
-        </div>
+  <!-- Requests section/page (requests-section) component template -->
+  <template id="requests-section">
+    <div>
+      <h1>{{numRequests}} Requests:</h1>
 
-        <!-- Query Params -->
-        <div class="request-block" id="request-query">
-          <div class="heading">Query Params</div>
-          <ul class="block-list">
-            <li v-for="(value, name) in request.queryParams" class="list-item -sans">
-              <div class="name">{{name}}:</div>
-              {{value}}
-            </li>
-          </ul>
-        </div>
+      <ul class="requests-list">
+        <li v-for="request in requests" :key="request.id" class="request-item">
+          <div class="request-block">
+            <div class="id">{{request.id}}</div>
+            <div class="method">{{request.method}}</div>
+            <div class="path">{{request.path}}</div>
+            <div class="time">{{request.time}}</div>
+          </div>
 
-        <!-- Headers -->
-        <div class="request-block" id="request-headers">
-          <div class="heading">Headers</div>
-          <ul class="block-list">
-            <li v-for="(value, name) in request.headers" class="list-item">
-              <div class="name">{{name}}:</div>
-              {{value}}
-            </li>
-          </ul>
-        </div>
-
-        <!-- Body -->
-        <div class="request-block" id="request-body">
-          <div class="heading">Body</div>
-
-          <!-- Show form params (payload) info -->
-          <div v-if="isForm(request)">
+          <!-- Query Params -->
+          <div class="request-block" id="request-query">
+            <div class="heading">Query Params</div>
             <ul class="block-list">
-              <li v-for="(value, name) in request.body" class="list-item">
+              <li v-for="(value, name) in request.queryParams" class="list-item -sans">
                 <div class="name">{{name}}:</div>
                 {{value}}
               </li>
             </ul>
           </div>
 
-          <!-- Show JSON payload -->
-          <div v-else-if="isJSON(request)">
-            <pre class="body-content"><code class="json">{{request.body}}</code></pre>
+          <!-- Headers -->
+          <div class="request-block" id="request-headers">
+            <div class="heading">Headers</div>
+            <ul class="block-list">
+              <li v-for="(value, name) in request.headers" class="list-item">
+                <div class="name">{{name}}:</div>
+                {{value}}
+              </li>
+            </ul>
           </div>
 
-          <!-- Show anything else as text (The server is parsing and putting any 'text/*' into body.text) -->
-          <div v-else-if="isText(request)">
-            <pre class="body-content"><code :class="getTextType(request)">{{request.body.text}}</code></pre>
-          </div>
-        </div>
+          <!-- Body -->
+          <div class="request-block" id="request-body">
+            <div class="heading">Body</div>
 
-      </li>
-    </ul>
-  </div>
+            <!-- Show form params (payload) info -->
+            <div v-if="isForm(request)">
+              <ul class="block-list">
+                <li v-for="(value, name) in request.body" class="list-item">
+                  <div class="name">{{name}}:</div>
+                  {{value}}
+                </li>
+              </ul>
+            </div>
+
+            <!-- Show JSON payload -->
+            <div v-else-if="isJSON(request)">
+              <pre class="body-content"><code class="json">{{request.body}}</code></pre>
+            </div>
+
+            <!-- Show anything else as text (The server is parsing and putting any 'text/*' into body.text) -->
+            <div v-else-if="isText(request)">
+              <pre class="body-content"><code :class="getTextType(request)">{{request.body.text}}</code></pre>
+            </div>
+          </div>
+
+        </li>
+      </ul>
+    </div>
+  </template>
+
+
   <!-- Load the app -->
   <script type="text/javascript" src="js/app.js"></script>
+  
 </body>
 </html>

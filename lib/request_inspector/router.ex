@@ -37,9 +37,16 @@ defmodule RequestInspector.Router do
 
   ## Endpoints
 
+  # Root path
+  get "/" do
+    conn
+    |> put_resp_header("content-type", "text/html")
+    |> send_file(200, "priv/static/index.html")
+  end
+
+  # Create a new endpoint server with a random key
   post "/keys" do
     conn = put_resp_header(conn, "content-type", "application/json")
-
     # Generate a key and build the naming tuple with it 
     # Use our custom child spec that receives the opts instead of args for start_link
     new_key = EndpointServer.generate_key()
@@ -57,7 +64,7 @@ defmodule RequestInspector.Router do
     end
   end
 
-  # See (inspect) all the requests you have made to /endpoint
+  # See (inspect) all the requests you have made to /:key/endpoint
   get "/:key/requests" do
     conn = put_resp_header(conn, "content-type", "application/json")
     case Registry.lookup(@registry, key) do
@@ -67,7 +74,7 @@ defmodule RequestInspector.Router do
           requests_agent
           |> RequestsAgent.get_requests()
           |> Poison.encode!(pretty: true)
-
+        # Respong with a JSON list with all the requests made to the /endpoint
         send_resp(conn, 200, json_response)
       
       _ ->
@@ -121,7 +128,7 @@ defmodule RequestInspector.Router do
     case Registry.lookup(@registry, key) do
       [{_gen_server, nil}] ->
         conn
-        |> put_resp_header("content-type", "text-html")
+        |> put_resp_header("content-type", "text/html")
         |> send_file(200, "priv/static/index.html")
       
       _ ->
@@ -150,7 +157,7 @@ defmodule RequestInspector.Router do
   # Default endpoint (matches anything else)
   match _ do
     Logger.warn("#{conn.method} request to #{conn.request_path}")
-    send_resp(conn, 404, "Oops! Invalid request. Try again.")
+    send_resp(conn, 404, "Oops! Invalid request. Path not found.")
   end
 
 

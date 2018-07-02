@@ -5,6 +5,21 @@ defmodule RequestInspector.RouterTest do
 
   @opts Router.init([])
 
+  test "GET / returns the index.html page" do
+    root_conn =
+      conn(:get, "/", "")
+      |> Router.call(@opts)
+    
+    index_conn = 
+    conn(:get, "/index.html", "")
+    |> Router.call(@opts)
+
+    assert root_conn.status == 200
+    assert index_conn.status == 200
+    assert root_conn.state == :file
+    assert root_conn.resp_body == index_conn.resp_body
+  end
+
   test "POST /keys creates a new GenServer with a random string as key" do
     initial_conn = 
       conn(:post, "/keys")
@@ -29,18 +44,14 @@ defmodule RequestInspector.RouterTest do
       conn(:get, "/index.html", "")
       |> Router.call(@opts)
 
-    assert root_conn.state == :file
-    assert index_conn.state == :file
-
     assert root_conn.status == 200
     assert index_conn.status == 200
-
+    assert root_conn.state == :file    
     assert root_conn.resp_body == index_conn.resp_body
   end
 
   test "DELETE /:key removes endpoint GenServer with the given key" do
     random_key = create_endpoint_server()
-
     assert random_key in RequestInspector.gen_servers_keys()
 
     conn =
@@ -53,7 +64,6 @@ defmodule RequestInspector.RouterTest do
 
   test "GET /:key/requests returns the requests made to the /endpoint" do
     random_key = create_endpoint_server()
-
     # Initial requests list is empty
     initial_conn =
       conn(:get, "/#{random_key}/requests", "")
