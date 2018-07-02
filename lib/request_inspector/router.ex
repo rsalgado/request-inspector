@@ -17,19 +17,20 @@ defmodule RequestInspector.Router do
   use Plug.Router
   use Plug.Debugger   # This should be only used for development.
 
+  @registry :endpoint_servers
+  @dynamic_supervisor RequestInspector.DynamicSupervisor
+
 
   plug(
     Plug.Static,
     at: "/",
     from: :request_inspector
   )
-
   plug(
     Plug.Parsers,
     parsers: [:urlencoded, :multipart, :json, RequestInspector.Parsers.Text],
     json_decoder: Poison
   )
-
   plug(:match)
   plug(:dispatch)
 
@@ -37,11 +38,15 @@ defmodule RequestInspector.Router do
   ## Endpoints
 
   post "/keys" do
-    new_key = EndpointServer.generate_key()
-    gs_name = {:via, Registry, {:endpoint_servers, new_key}}
+    conn = put_resp_header(conn, "content-type", "application/json")
 
-    conn = put_resp_header(conn, "content-type", "application/json")    
-    case EndpointServer.start_link([], name: gs_name) do
+    # Generate a key and build the naming tuple with it 
+    # Use our custom child spec that receives the opts instead of args for start_link
+    new_key = EndpointServer.generate_key()
+    gs_name = {:via, Registry, {@registry, new_key}}
+    child_spec = EndpointServer.custom_child_spec(name: gs_name)
+
+    case DynamicSupervisor.start_child(@dynamic_supervisor, child_spec) do
       {:ok, _} ->
         json_response = Poison.encode!(%{key: new_key}, pretty: true)
         send_resp(conn, 201, json_response)
@@ -55,7 +60,7 @@ defmodule RequestInspector.Router do
   # See (inspect) all the requests you have made to /endpoint
   get "/:key/requests" do
     conn = put_resp_header(conn, "content-type", "application/json")
-    case Registry.lookup(:endpoint_servers, key) do
+    case Registry.lookup(@registry, key) do
       [{gen_server, nil}] ->
         {:ok, requests_agent} = EndpointServer.get_requests_agent(gen_server)
         json_response =
@@ -74,7 +79,7 @@ defmodule RequestInspector.Router do
   # Endpoint (send your requests here)
   match "/:key/endpoint" do
     conn = put_resp_header(conn, "content-type", "application/json")
-    case Registry.lookup(:endpoint_servers, key) do
+    case Registry.lookup(@registry, key) do
       [{gen_server, nil}] ->
         {:ok, requests_agent} = EndpointServer.get_requests_agent(gen_server)
         {:ok, stream_agent} = EndpointServer.get_stream_agent(gen_server)
@@ -98,9 +103,8 @@ defmodule RequestInspector.Router do
 
   # SSE endpoint
   get "/:key/sse" do
-    [{gen_server, nil}] = Registry.lookup(:endpoint_servers, key)
+    [{gen_server, nil}] = Registry.lookup(@registry, key)
     {:ok, stream_agent} = EndpointServer.get_stream_agent(gen_server)
-
     # Store current connection's process ID
     StreamAgent.set_connection_pid(self(), stream_agent)
 
@@ -113,8 +117,8 @@ defmodule RequestInspector.Router do
   end
 
   get "/:key" do
-    case Registry.lookup(:endpoint_servers, key) do
-      [{gen_server, nil}] ->
+    case Registry.lookup(@registry, key) do
+      [{_gen_server, nil}] ->
         conn
         |> put_resp_header("content-type", "text-html")
         |> send_file(200, "priv/static/index.html")

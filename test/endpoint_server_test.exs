@@ -31,4 +31,8 @@ defmodule RequestInspector.EndpointServerTest do
     assert Agent.get(req_agent, & &1) == %{counter: 0, requests: []}
     assert Agent.get(stream_agent, & &1) == nil
   end
+
+  test "Can provide a custom child spec with the correct settings" do
+    flunk "Test not implemented yet"
+  end
 end

@@ -23,6 +23,14 @@ defmodule RequestInspector.EndpointServer do
     |> List.to_string()
   end
 
+  def custom_child_spec(opts) do
+    %{
+      id: __MODULE__,
+      restart: :transient,
+      start: {__MODULE__, :start_link, [[], opts]}
+    }
+  end
+
 
   def init(_args) do
     Logger.info("Starting EndpointServer #{inspect self()}")
