@@ -116,6 +116,7 @@ defmodule RequestInspector.Router do
       |> stream_loop()
   end
 
+  # Get the front-end for the endpoint with the given key
   get "/:key" do
     case Registry.lookup(@registry, key) do
       [{_gen_server, nil}] ->
@@ -124,8 +125,25 @@ defmodule RequestInspector.Router do
         |> send_file(200, "priv/static/index.html")
       
       _ ->
-        Logger.warn("#{conn.method} request to #{conn.request_path}")
-        send_resp(conn, 400, "Key not found")
+        json_response = Poison.encode!(%{error: "Key not found"}, pretty: true)
+        conn
+        |> put_resp_header("content-type", "application/json")
+        |> send_resp(400, json_response)
+    end
+  end
+
+  # Delete the endpoint with the given key
+  delete "/:key" do
+    conn = put_resp_header(conn, "content-type", "application/json")
+    case Registry.lookup(@registry, key) do
+      [{gen_server, nil}] ->
+        :ok = DynamicSupervisor.terminate_child(@dynamic_supervisor, gen_server)
+        json_response = Poison.encode!(%{message: "Endpoint successfully deleted"}, pretty: true)
+        send_resp(conn, 200, json_response)
+
+      _ ->
+        json_response = Poison.encode!(%{error: "Key not found"}, pretty: true)
+        send_resp(conn, 400, json_response)
     end
   end
 

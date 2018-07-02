@@ -33,6 +33,10 @@ defmodule RequestInspector.EndpointServerTest do
   end
 
   test "Can provide a custom child spec with the correct settings" do
-    flunk "Test not implemented yet"
+    name = {}
+    spec = EndpointServer.custom_child_spec(name: name)
+
+    assert spec[:restart] == :transient
+    assert spec[:start] == {EndpointServer, :start_link, [[], [name: name]]}
   end
 end

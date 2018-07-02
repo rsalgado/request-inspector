@@ -13,10 +13,13 @@ defmodule RequestInspector.RouterTest do
     
     assert initial_conn.status == 201
     assert Map.has_key?(response_map, "key")
+
+    key = Map.get(response_map, "key")
+    assert key in RequestInspector.gen_servers_keys()
   end
 
   test "GET /:key returns the index.html page" do
-    random_key = create_key()
+    random_key = create_endpoint_server()
 
     root_conn = 
       conn(:get, "/#{random_key}", "")
@@ -35,8 +38,21 @@ defmodule RequestInspector.RouterTest do
     assert root_conn.resp_body == index_conn.resp_body
   end
 
-  test "GET /:key/requests returns the requests made to the endpoint" do
-    random_key = create_key()
+  test "DELETE /:key removes endpoint GenServer with the given key" do
+    random_key = create_endpoint_server()
+
+    assert random_key in RequestInspector.gen_servers_keys()
+
+    conn =
+      conn(:delete, "/#{random_key}", "")
+      |> Router.call(@opts)
+
+    assert conn.status == 200
+    assert random_key not in RequestInspector.gen_servers_keys()
+  end
+
+  test "GET /:key/requests returns the requests made to the /endpoint" do
+    random_key = create_endpoint_server()
 
     # Initial requests list is empty
     initial_conn =
@@ -69,12 +85,13 @@ defmodule RequestInspector.RouterTest do
   end
 
 
-  defp create_key() do
+  defp create_endpoint_server() do
     initial_conn =
       conn(:post, "/keys")
       |> Router.call(@opts)
 
     response_map = Poison.decode!(initial_conn.resp_body)
+    # Return the key of the newly-created GenServer
     Map.get(response_map, "key")
   end
 end
