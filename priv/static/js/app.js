@@ -1,7 +1,5 @@
-function getKeyFromPath() {
-  return window.location.pathname.split("/")[1];
-}
-
+function getKeyFromPath() { return window.location.pathname.split("/")[1]; }
+function getAbsolutePath() { return window.location.href; }
 
 let indexSection = Vue.component("index-section", {
   template: "#index-section",
@@ -17,16 +15,12 @@ let indexSection = Vue.component("index-section", {
     getEndpointKey() {
       let self = this;
       axios.post("/keys")
-        .then(function(response) {
-          self.endpointKey = response.data.key;
-        });
+        .then(response => self.endpointKey = response.data.key);
     }
   },
 
   computed: {
-    hasEndpointKey() {
-      return this.endpointKey !== "";
-    }
+    hasEndpointKey() {  return this.endpointKey !== ""; }
   }
 });
 
@@ -45,7 +39,9 @@ let requestsSection = Vue.component("requests-section", {
 
   data() {
     return {
-      requests: []
+      requests: [],
+      key: getKeyFromPath(),
+      endpointPath: `${getAbsolutePath()}/endpoint`
     };
   },
 
@@ -58,8 +54,7 @@ let requestsSection = Vue.component("requests-section", {
   methods: {
     // SSE client functionality (wrapped for convenience to avoid namespace issues)
     startSSE() {
-      let key = getKeyFromPath();
-      let source = new EventSource(`/${key}/sse`);
+      let source = new EventSource(`/${this.key}/sse`);
       let self = this;
 
       source.addEventListener("message", function(event) {
@@ -84,12 +79,16 @@ let requestsSection = Vue.component("requests-section", {
     // Load requests from backend
     loadRequests() {
       let self = this;
-      let key = getKeyFromPath();
+      axios.get(`/${this.key}/requests`)
+        .then(resp => self.requests = resp.data);
+    },
 
-      axios.get(`/${key}/requests`)
-        .then(function(resp) {
-          self.requests = resp.data;
-        });
+    deleteEndpoint() {
+      let confirmed = confirm("Are you sure you want to delete this endpoint?");
+      if (confirmed) {
+        axios.delete(`/${this.key}`)
+          .then(_resp => window.location.href = "/")
+      }
     },
 
     isJSON(request) {

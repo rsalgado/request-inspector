@@ -37,6 +37,13 @@
   <!-- Requests section/page (requests-section) component template -->
   <template id="requests-section">
     <div>
+      <div class="top-bar">
+        <div class="message">
+          Send your requests to <a :href="endpointPath" class="endpoint-url">{{endpointPath}}</a>
+        </div>
+        <button class="delete-button" @click="deleteEndpoint()">Delete</button>
+      </div>
+
       <h1>{{numRequests}} Requests:</h1>
 
       <ul class="requests-list">
