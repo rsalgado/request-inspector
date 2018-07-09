@@ -4,7 +4,7 @@ defmodule RequestInspector.MixProject do
   def project do
     [
       app: :request_inspector,
-      version: "0.1.0",
+      version: "1.0.0",
       elixir: "~> 1.6",
       start_permanent: Mix.env() == :prod,
       deps: deps()
@@ -24,7 +24,8 @@ defmodule RequestInspector.MixProject do
     [
       {:cowboy, "~> 1.1"},
       {:plug, "~> 1.3"},
-      {:poison, "~> 3.1"}
+      {:poison, "~> 3.1"},
+      {:distillery, "~> 1.5"}
     ]
   end
 end
