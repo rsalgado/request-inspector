@@ -15,7 +15,7 @@ defmodule RequestInspector.Router do
   require Logger
 
   use Plug.Router
-  use Plug.Debugger   # This should be only used for development.
+  #use Plug.Debugger   # This should be only used for development.
 
   @registry :endpoint_servers
   @dynamic_supervisor RequestInspector.DynamicSupervisor
@@ -41,7 +41,7 @@ defmodule RequestInspector.Router do
   get "/" do
     conn
     |> put_resp_header("content-type", "text/html")
-    |> send_file(200, "priv/static/index.html")
+    |> send_file(200, Application.app_dir(:request_inspector, "priv/static/index.html"))
   end
 
   # Create a new endpoint server with a random key
@@ -129,7 +129,7 @@ defmodule RequestInspector.Router do
       [{_gen_server, nil}] ->
         conn
         |> put_resp_header("content-type", "text/html")
-        |> send_file(200, "priv/static/index.html")
+        |> send_file(200, Application.app_dir(:request_inspector, "priv/static/index.html"))
       
       _ ->
         json_response = Poison.encode!(%{error: "Key not found"}, pretty: true)
