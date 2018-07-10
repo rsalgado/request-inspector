@@ -4,7 +4,7 @@ defmodule RequestInspector.MixProject do
   def project do
     [
       app: :request_inspector,
-      version: "1.0.1",
+      version: "1.0.2",
       elixir: "~> 1.6",
       start_permanent: Mix.env() == :prod,
       deps: deps()
@@ -14,6 +14,7 @@ defmodule RequestInspector.MixProject do
   # Run "mix help compile.app" to learn about applications.
   def application do
     [
+      applications: [:cowboy, :plug],   # Although it seems to work without this line; Plug docs say this should be added
       extra_applications: [:logger],
       mod: {RequestInspector, []}
     ]
@@ -22,8 +23,8 @@ defmodule RequestInspector.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      {:cowboy, "~> 1.1"},
-      {:plug, "~> 1.3"},
+      {:cowboy, "~> 2.0"},
+      {:plug, "~> 1.6"},
       {:poison, "~> 3.1"},
       {:distillery, "~> 1.5"}
     ]

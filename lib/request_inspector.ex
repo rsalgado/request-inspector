@@ -10,7 +10,7 @@ defmodule RequestInspector do
     # Use the modules names as agents' names. 
     # Also used in `RequestInspector.Router` attributes
     children = [
-      Plug.Adapters.Cowboy.child_spec(:http, RequestInspector.Router, [], port: 5000),
+      {Plug.Adapters.Cowboy2, scheme: :http, plug: RequestInspector.Router, options: [port: 5000]},
       Registry.child_spec(keys: :unique, name: @registry),
       {DynamicSupervisor, strategy: :one_for_one, name: @dynamic_supervisor}
     ]
