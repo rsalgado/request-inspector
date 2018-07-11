@@ -5,10 +5,10 @@ defmodule RequestInspector.Router do
 
   ## Routes (Endpoints)
 
-      GET  /:key              Serves priv/static/index.html. Equivalent to GET /index.html
-      GET  /:key/requests     See (inspect) all the requests you have made to /endpoint
-      *    /:key/endpoint     Endpoint (send your requests here)
-      GET  /:key/sse          SSE endpoint
+      GET  /buckets/:key              Serves priv/static/index.html. Equivalent to GET /index.html
+      GET  /buckets/:key/requests     See (inspect) all the requests you have made to /endpoint
+      *    /buckets/:key/endpoint     Endpoint (send your requests here)
+      GET  /buckets/:key/sse          SSE endpoint
   """
 
   alias RequestInspector.{RequestsAgent, StreamAgent, EndpointServer}
@@ -45,7 +45,7 @@ defmodule RequestInspector.Router do
   end
 
   # Create a new endpoint server with a random key
-  post "/keys" do
+  post "/buckets" do
     conn = put_resp_header(conn, "content-type", "application/json")
     # Generate a key and build the naming tuple with it 
     # Use our custom child spec that receives the opts instead of args for start_link
@@ -65,7 +65,7 @@ defmodule RequestInspector.Router do
   end
 
   # See (inspect) all the requests you have made to /:key/endpoint
-  get "/:key/requests" do
+  get "/buckets/:key/requests" do
     conn = put_resp_header(conn, "content-type", "application/json")
     case Registry.lookup(@registry, key) do
       [{gen_server, nil}] ->
@@ -84,7 +84,7 @@ defmodule RequestInspector.Router do
   end
 
   # Endpoint (send your requests here)
-  match "/:key/endpoint" do
+  match "/buckets/:key/endpoint" do
     conn = put_resp_header(conn, "content-type", "application/json")
     case Registry.lookup(@registry, key) do
       [{gen_server, nil}] ->
@@ -109,7 +109,7 @@ defmodule RequestInspector.Router do
   end
 
   # SSE endpoint
-  get "/:key/sse" do
+  get "/buckets/:key/sse" do
     [{gen_server, nil}] = Registry.lookup(@registry, key)
     {:ok, stream_agent} = EndpointServer.get_stream_agent(gen_server)
     # Store current connection's process ID
@@ -124,7 +124,7 @@ defmodule RequestInspector.Router do
   end
 
   # Get the front-end for the endpoint with the given key
-  get "/:key" do
+  get "/buckets/:key" do
     case Registry.lookup(@registry, key) do
       [{_gen_server, nil}] ->
         conn
@@ -140,7 +140,7 @@ defmodule RequestInspector.Router do
   end
 
   # Delete the endpoint with the given key
-  delete "/:key" do
+  delete "/buckets/:key" do
     conn = put_resp_header(conn, "content-type", "application/json")
     case Registry.lookup(@registry, key) do
       [{gen_server, nil}] ->

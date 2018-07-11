@@ -2,7 +2,7 @@
 <html>
 <head>
   <title>Request Inspector</title>
-  <link rel="stylesheet" type="text/css" href="css/styles.css">
+  <link rel="stylesheet" type="text/css" href="/css/styles.css">
   <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.12.0/build/styles/default.min.css">
   
   <!-- Load vue.js, axios and highlight.js before rendering -->
@@ -14,7 +14,7 @@
 
 <body>
   <div id="app">
-    <index-section v-if="isRootPage"></index-section>
+    <index-section v-if="isRootPage()"></index-section>
     <requests-section v-else></requests-section>
   </div>
   
@@ -28,7 +28,7 @@
           @click="getEndpointKey()">Give me a new key!</button>
           
           <div class="right box">
-            <a :href="endpointKey">/{{endpointKey}}</a>
+            <a :href="bucketPath">{{bucketPath}}</a>
           </div>
       </div>
     </div>
@@ -41,7 +41,7 @@
         <div class="message">
           Send your requests to <a :href="endpointPath" class="endpoint-url">{{endpointPath}}</a>
         </div>
-        <button class="delete-button" @click="deleteEndpoint()">Delete</button>
+        <button class="delete-button" @click="deleteBucket()">Delete Bucket</button>
       </div>
 
       <h1>{{numRequests}} Requests:</h1>
@@ -109,7 +109,7 @@
 
 
   <!-- Load the app -->
-  <script type="text/javascript" src="js/app.js"></script>
+  <script type="text/javascript" src="/js/app.js"></script>
   
 </body>
 </html>

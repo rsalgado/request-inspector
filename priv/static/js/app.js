@@ -1,4 +1,4 @@
-function getKeyFromPath() { return window.location.pathname.split("/")[1]; }
+function getKeyFromPath() { return window.location.pathname.match(/\/buckets\/(\w+)/i)[1]; }
 function getAbsolutePath() { return window.location.href; }
 
 let indexSection = Vue.component("index-section", {
@@ -6,7 +6,6 @@ let indexSection = Vue.component("index-section", {
 
   data() {
     return {
-      greeting: "Hello from the index section!",
       endpointKey: ""
     };
   },
@@ -14,13 +13,14 @@ let indexSection = Vue.component("index-section", {
   methods: {
     getEndpointKey() {
       let self = this;
-      axios.post("/keys")
+      axios.post("/buckets")
         .then(response => self.endpointKey = response.data.key);
     }
   },
 
   computed: {
-    hasEndpointKey() {  return this.endpointKey !== ""; }
+    hasEndpointKey() {  return this.endpointKey !== ""; },
+    bucketPath() { return `/buckets/${this.endpointKey}`; }
   }
 });
 
@@ -54,39 +54,39 @@ let requestsSection = Vue.component("requests-section", {
   methods: {
     // SSE client functionality (wrapped for convenience to avoid namespace issues)
     startSSE() {
-      let source = new EventSource(`/${this.key}/sse`);
+      let source = new EventSource(`/buckets/${this.key}/sse`);
       let self = this;
 
-      source.addEventListener("message", function(event) {
+      source.addEventListener("message", (event) => {
         console.log(`Received event: ${event}`);
 
         // Make the Vue app reload the requests when there was an update
-        if (event.data === "updated") {
-          self.loadRequests();
-        }
+        if (event.data === "updated")   self.loadRequests();
       }, false);
 
-      source.addEventListener("open", function(event) {
+      source.addEventListener("open", (event) => {
         console.log("EventSource connected.");
       }, false);
 
-      source.addEventListener("error", function(event) {
-        if (event.eventPhase == EventSource.CLOSED) 
-          console.log("EventSource was closed.");
+      source.addEventListener("error", (event) => {
+        if (event.eventPhase == EventSource.CLOSED) {
+          console.log("Reconnecting because EventSource was closed with event: ");
+          console.log(event);
+        }
       }, false);
     },
 
     // Load requests from backend
     loadRequests() {
       let self = this;
-      axios.get(`/${this.key}/requests`)
+      axios.get(`/buckets/${this.key}/requests`)
         .then(resp => self.requests = resp.data);
     },
 
-    deleteEndpoint() {
-      let confirmed = confirm("Are you sure you want to delete this endpoint?");
+    deleteBucket() {
+      let confirmed = confirm("Are you sure you want to delete this bucket?");
       if (confirmed) {
-        axios.delete(`/${this.key}`)
+        axios.delete(`/buckets/${this.key}`)
           .then(_resp => window.location.href = "/")
       }
     },
@@ -119,9 +119,7 @@ let requestsSection = Vue.component("requests-section", {
 
 let app = new Vue({
   el: "#app",
-  data() {
-    return {
-      isRootPage: getKeyFromPath() === ""
-    }
+  methods: {
+    isRootPage() { return window.location.pathname === "/"; }
   }
 });
