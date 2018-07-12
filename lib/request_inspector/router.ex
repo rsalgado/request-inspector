@@ -11,7 +11,7 @@ defmodule RequestInspector.Router do
       GET  /buckets/:key/sse          SSE endpoint
   """
 
-  alias RequestInspector.{RequestsAgent, StreamAgent, EndpointServer}
+  alias RequestInspector.{RequestsAgent, StreamAgent, BucketServer}
   require Logger
 
   use Plug.Router
@@ -49,9 +49,9 @@ defmodule RequestInspector.Router do
     conn = put_resp_header(conn, "content-type", "application/json")
     # Generate a key and build the naming tuple with it 
     # Use our custom child spec that receives the opts instead of args for start_link
-    new_key = EndpointServer.generate_key()
+    new_key = BucketServer.generate_key()
     gs_name = {:via, Registry, {@registry, new_key}}
-    child_spec = EndpointServer.custom_child_spec(name: gs_name)
+    child_spec = BucketServer.custom_child_spec(name: gs_name)
 
     case DynamicSupervisor.start_child(@dynamic_supervisor, child_spec) do
       {:ok, _} ->
@@ -69,7 +69,7 @@ defmodule RequestInspector.Router do
     conn = put_resp_header(conn, "content-type", "application/json")
     case Registry.lookup(@registry, key) do
       [{gen_server, nil}] ->
-        {:ok, requests_agent} = EndpointServer.get_requests_agent(gen_server)
+        {:ok, requests_agent} = BucketServer.get_requests_agent(gen_server)
         json_response =
           requests_agent
           |> RequestsAgent.get_requests()
@@ -88,8 +88,8 @@ defmodule RequestInspector.Router do
     conn = put_resp_header(conn, "content-type", "application/json")
     case Registry.lookup(@registry, key) do
       [{gen_server, nil}] ->
-        {:ok, requests_agent} = EndpointServer.get_requests_agent(gen_server)
-        {:ok, stream_agent} = EndpointServer.get_stream_agent(gen_server)
+        {:ok, requests_agent} = BucketServer.get_requests_agent(gen_server)
+        {:ok, stream_agent} = BucketServer.get_stream_agent(gen_server)
 
         # Store and encode request
         json_response =
@@ -111,7 +111,7 @@ defmodule RequestInspector.Router do
   # SSE endpoint
   get "/buckets/:key/sse" do
     [{gen_server, nil}] = Registry.lookup(@registry, key)
-    {:ok, stream_agent} = EndpointServer.get_stream_agent(gen_server)
+    {:ok, stream_agent} = BucketServer.get_stream_agent(gen_server)
     # Store current connection's process ID
     StreamAgent.set_connection_pid(self(), stream_agent)
 

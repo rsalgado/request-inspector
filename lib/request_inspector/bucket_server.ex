@@ -1,6 +1,9 @@
-defmodule RequestInspector.EndpointServer do
+defmodule RequestInspector.BucketServer do
   require Logger
   use GenServer
+
+  @registry :endpoint_servers
+  @dynamic_supervisor RequestInspector.DynamicSupervisor
 
   def start_link(args, opts \\ []) do
     GenServer.start_link(__MODULE__, args, opts)
@@ -16,12 +19,27 @@ defmodule RequestInspector.EndpointServer do
     GenServer.call(gen_server, :get_stream_agent)
   end
 
+  @doc """
+  Helper function to generate a random string of `n` chars (8 by default).
+  Possible characters are digits and lowercase letters.
+  """
   @spec generate_key(integer) :: String.t
   def generate_key(n \\ 8) do
     '0123456789abcdefghijklmnopqrstuvwxyz'
     |> Enum.take_random(n)
     |> List.to_string()
   end
+
+  @doc """
+  Helper function to get the keys of all the `BucketServer`s being supervised
+  """
+  @spec gen_servers_keys() :: [String.t]
+  def gen_servers_keys() do
+    DynamicSupervisor.which_children(@dynamic_supervisor)
+    |> Enum.map(fn {_, pid, _, _} ->  pid end)
+    |> Enum.map(fn(pid) ->  Registry.keys(@registry, pid) end)
+    |> Enum.reduce([], fn(x, acc) ->  acc ++ x end)
+  end  
 
   def custom_child_spec(opts) do
     %{
@@ -33,7 +51,7 @@ defmodule RequestInspector.EndpointServer do
 
 
   def init(_args) do
-    Logger.info("Starting EndpointServer #{inspect self()}")
+    Logger.info("Starting BucketServer #{inspect self()}")
     {:ok, req_agent} = RequestInspector.RequestsAgent.start_link []
     {:ok, stream_agent} = RequestInspector.StreamAgent.start_link []
 

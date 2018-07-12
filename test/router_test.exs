@@ -1,5 +1,5 @@
 defmodule RequestInspector.RouterTest do
-  alias RequestInspector.Router
+  alias RequestInspector.{Router, BucketServer}
   use ExUnit.Case
   use Plug.Test
 
@@ -30,7 +30,7 @@ defmodule RequestInspector.RouterTest do
     assert Map.has_key?(response_map, "key")
 
     key = Map.get(response_map, "key")
-    assert key in RequestInspector.gen_servers_keys()
+    assert key in BucketServer.gen_servers_keys()
   end
 
   test "GET /buckets/:key returns the index.html page" do
@@ -52,14 +52,14 @@ defmodule RequestInspector.RouterTest do
 
   test "DELETE /buckets/:key removes bucket GenServer with the given key" do
     random_key = create_bucket_server()
-    assert random_key in RequestInspector.gen_servers_keys()
+    assert random_key in BucketServer.gen_servers_keys()
 
     conn =
       conn(:delete, "/buckets/#{random_key}", "")
       |> Router.call(@opts)
 
     assert conn.status == 200
-    assert random_key not in RequestInspector.gen_servers_keys()
+    assert random_key not in BucketServer.gen_servers_keys()
   end
 
   test "GET /buckets/:key/requests returns the requests made to the bucket's /endpoint" do
