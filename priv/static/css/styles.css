@@ -61,21 +61,22 @@ a {
 }
   .top-bar > .message {
     flex-grow: 1;
-    padding: 0.25rem;
+    padding: 0.5rem;
     background: #eee;
     font-weight: bold;
     margin-right: 1rem;
     border: 1px solid #ddd;
     border-radius: 4px;
   }
-
-.delete-button {
-  background: #eb4335;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  font-weight: bold;
-}
+  .top-bar > .delete-button {
+    background: #eb4335;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-weight: bold;
+    box-shadow: rgba(0,0,0,0.2) 0 0 2px 1px;
+    padding: 0 0.5rem;
+  }
 
 .requests-list {
   list-style-type: none;
@@ -92,6 +93,7 @@ a {
 .request-block {
   padding: 1rem;
   border-top: 1px solid #ccc;
+  flex-wrap: wrap;
 }
 
   .request-block:first-child {
@@ -109,6 +111,7 @@ a {
     margin-right: 1.5rem;
     border-radius: 0.25rem;
     font-size: 1.125rem;
+    flex-shrink: 0;
   }
 
   .request-block > .method {
@@ -125,6 +128,7 @@ a {
 
   .request-block > .time {
     color: #777;
+    margin-top: 0.5rem;
   }
 
   .request-block > .heading {
@@ -150,9 +154,13 @@ a {
     font-family: sans-serif;
   }
 
-.list-item > .name {
-  font-weight: bold;
+
+.list-item {
+  word-wrap: break-word;
 }
+  .list-item > .name {
+    font-weight: bold;
+  }
 
 .body-content {
   padding: 0.5rem;
@@ -178,6 +186,10 @@ a {
 
 @media (min-width: 900px) {
   .block-list > .list-item {
-    width: 32%;
+    width: 30%;
+  }
+
+  .request-block > .time {
+    margin-top: 0;
   }
 }
