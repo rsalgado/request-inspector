@@ -2,6 +2,8 @@
 
 Basic application for inspecting HTTP requests. I made this project for practice and learning purposes, with the aim of getting more experience with Elixir and some tools.
 
+![](https://i.imgur.com/pcwBecA.gifv)
+
 It uses the following technologies:
 
 * **Plug**: as the server, with a router and a custom plug parser for text content.

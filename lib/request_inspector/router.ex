@@ -3,12 +3,14 @@ defmodule RequestInspector.Router do
   Plug Router for handling all the HTTP requests: serving the static files (like the index.html page),
   handling the HTTP requests made to the endpoint, getting the list of requests made, and handling SSE.
 
-  ## Routes (Endpoints)
+  ## Routes (API Endpoints)
 
-      GET  /buckets/:key              Serves priv/static/index.html. Equivalent to GET /index.html
-      GET  /buckets/:key/requests     See (inspect) all the requests you have made to /endpoint
-      *    /buckets/:key/endpoint     Endpoint (send your requests here)
-      GET  /buckets/:key/sse          SSE endpoint
+      POST    /buckets                Create a new bucket
+      GET     /buckets/:key           Get the front-end for the bucket with the given key
+      GET     /buckets/:key/requests  See (inspect) all the requests you have made to /endpoint
+      *       /buckets/:key/endpoint  Endpoint (send your requests here)
+      GET     /buckets/:key/sse       SSE endpoint
+      DELETE  /buckets/:key           Delete the bucket with the given key
   """
 
   alias RequestInspector.{RequestsAgent, StreamAgent, BucketServer}
@@ -44,7 +46,7 @@ defmodule RequestInspector.Router do
     |> send_file(200, Application.app_dir(:request_inspector, "priv/static/index.html"))
   end
 
-  # Create a new endpoint server with a random key
+  # Create a new bucket with a random key
   post "/buckets" do
     conn = put_resp_header(conn, "content-type", "application/json")
     # Generate a key and build the naming tuple with it 
@@ -123,7 +125,7 @@ defmodule RequestInspector.Router do
       |> stream_loop()
   end
 
-  # Get the front-end for the endpoint with the given key
+  # Get the front-end for the bucket with the given key
   get "/buckets/:key" do
     case Registry.lookup(@registry, key) do
       [{_gen_server, nil}] ->
@@ -139,7 +141,7 @@ defmodule RequestInspector.Router do
     end
   end
 
-  # Delete the endpoint with the given key
+  # Delete the bucket with the given key
   delete "/buckets/:key" do
     conn = put_resp_header(conn, "content-type", "application/json")
     case Registry.lookup(@registry, key) do
