@@ -2,7 +2,8 @@
 
 Basic application for inspecting HTTP requests. I made this project for practice and learning purposes, with the aim of getting more experience with Elixir and some tools.
 
-![](https://i.imgur.com/pcwBecA.gifv)
+<img src="https://i.imgur.com/pcwBecA.gif" height="512px"/>
+
 
 It uses the following technologies:
 
