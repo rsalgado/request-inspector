@@ -41,6 +41,19 @@ defmodule RequestInspector.BucketServer do
     |> Enum.reduce([], fn(x, acc) ->  acc ++ x end)
   end  
 
+
+  @doc """
+  Create a new bucket with the given name
+  """
+  def new(name) do
+    Logger.info("Starting BucketServer #{name}")
+    # Use our custom child spec that receives the opts instead of args for start_link
+    gs_name = {:via, Registry, {@registry, name}}
+    child_spec = custom_child_spec(name: gs_name)
+
+    DynamicSupervisor.start_child(@dynamic_supervisor, child_spec)
+  end
+
   def custom_child_spec(opts) do
     %{
       id: __MODULE__,
@@ -49,9 +62,34 @@ defmodule RequestInspector.BucketServer do
     }
   end
 
+  @doc """
+  Find a bucket by its name (key)
+  """
+  def find(name) do
+    case Registry.lookup(@registry, name) do
+      [{gen_server, nil}] ->
+        {:ok, gen_server}
+      
+      [] ->
+        {:error, "Not found"}
+    end
+  end
 
+  @doc """
+  Delete bucket by its name (key)
+  """
+  def delete(name) do
+    case find(name) do
+      {:ok, gen_server} ->
+        Logger.info("Terminating BucketServer #{name}")
+        DynamicSupervisor.terminate_child(@dynamic_supervisor, gen_server)
+      other -> 
+        other
+    end
+  end
+
+  
   def init(_args) do
-    Logger.info("Starting BucketServer #{inspect self()}")
     {:ok, req_agent} = RequestInspector.RequestsAgent.start_link []
     {:ok, stream_agent} = RequestInspector.StreamAgent.start_link []
 
@@ -59,7 +97,7 @@ defmodule RequestInspector.BucketServer do
     {:ok, state}
   end
 
-  def terminate(_reason, {req_agent, stream_agent}) do
+  def terminate(_reason, {req_agent, stream_agent} = _state) do
     Agent.stop(req_agent)
     Agent.stop(stream_agent)
   end

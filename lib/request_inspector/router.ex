@@ -19,9 +19,6 @@ defmodule RequestInspector.Router do
   use Plug.Router
   #use Plug.Debugger   # This should be only used for development.
 
-  @registry :endpoint_servers
-  @dynamic_supervisor RequestInspector.DynamicSupervisor
-
 
   plug(
     Plug.Static,
@@ -49,19 +46,16 @@ defmodule RequestInspector.Router do
   # Create a new bucket with a random key
   post "/buckets" do
     conn = put_resp_header(conn, "content-type", "application/json")
-    # Generate a key and build the naming tuple with it 
-    # Use our custom child spec that receives the opts instead of args for start_link
+    # Generate a key to use as name
     new_key = BucketServer.generate_key()
-    gs_name = {:via, Registry, {@registry, new_key}}
-    child_spec = BucketServer.custom_child_spec(name: gs_name)
 
-    case DynamicSupervisor.start_child(@dynamic_supervisor, child_spec) do
+    case BucketServer.new(new_key) do
       {:ok, _} ->
         json_response = Poison.encode!(%{key: new_key}, pretty: true)
         send_resp(conn, 201, json_response)
       
       _ ->
-        json_response = Poison.encode!(%{error: "Couldn't create GenServer"}, pretty: true)
+        json_response = Poison.encode!(%{error: "Couldn't create Bucket"}, pretty: true)
         send_resp(conn, 400, json_response)
     end
   end
@@ -69,8 +63,8 @@ defmodule RequestInspector.Router do
   # See (inspect) all the requests you have made to /:key/endpoint
   get "/buckets/:key/requests" do
     conn = put_resp_header(conn, "content-type", "application/json")
-    case Registry.lookup(@registry, key) do
-      [{gen_server, nil}] ->
+    case BucketServer.find(key) do
+      {:ok, gen_server} ->
         {:ok, requests_agent} = BucketServer.get_requests_agent(gen_server)
         json_response =
           requests_agent
@@ -88,8 +82,8 @@ defmodule RequestInspector.Router do
   # Endpoint (send your requests here)
   match "/buckets/:key/endpoint" do
     conn = put_resp_header(conn, "content-type", "application/json")
-    case Registry.lookup(@registry, key) do
-      [{gen_server, nil}] ->
+    case BucketServer.find(key) do
+      {:ok, gen_server} ->
         {:ok, requests_agent} = BucketServer.get_requests_agent(gen_server)
         {:ok, stream_agent} = BucketServer.get_stream_agent(gen_server)
 
@@ -112,7 +106,7 @@ defmodule RequestInspector.Router do
 
   # SSE endpoint
   get "/buckets/:key/sse" do
-    [{gen_server, nil}] = Registry.lookup(@registry, key)
+    {:ok, gen_server} = BucketServer.find(key)
     {:ok, stream_agent} = BucketServer.get_stream_agent(gen_server)
     # Store current connection's process ID
     StreamAgent.set_connection_pid(self(), stream_agent)
@@ -120,15 +114,15 @@ defmodule RequestInspector.Router do
     # Send initial response to open the stream and then, start the loop streaming events to browser
     # Return the connection when the loop is over: stream_loop returns the connection.
     conn
-      |> put_resp_header("content-type", "text/event-stream")
-      |> send_chunked(200)
-      |> stream_loop()
+    |> put_resp_header("content-type", "text/event-stream")
+    |> send_chunked(200)
+    |> stream_loop()
   end
 
   # Get the front-end for the bucket with the given key
   get "/buckets/:key" do
-    case Registry.lookup(@registry, key) do
-      [{_gen_server, nil}] ->
+    case BucketServer.find(key) do
+      {:ok, _} ->
         conn
         |> put_resp_header("content-type", "text/html")
         |> send_file(200, Application.app_dir(:request_inspector, "priv/static/index.html"))
@@ -144,14 +138,13 @@ defmodule RequestInspector.Router do
   # Delete the bucket with the given key
   delete "/buckets/:key" do
     conn = put_resp_header(conn, "content-type", "application/json")
-    case Registry.lookup(@registry, key) do
-      [{gen_server, nil}] ->
-        :ok = DynamicSupervisor.terminate_child(@dynamic_supervisor, gen_server)
-        json_response = Poison.encode!(%{message: "Endpoint successfully deleted"}, pretty: true)
+    case BucketServer.delete(key) do
+      :ok ->
+        json_response = Poison.encode!(%{message: "Bucket successfully deleted"}, pretty: true)
         send_resp(conn, 200, json_response)
 
-      _ ->
-        json_response = Poison.encode!(%{error: "Key not found"}, pretty: true)
+      other ->
+        json_response = Poison.encode!(%{error: "Could not delete bucket:\n#{other}"}, pretty: true)
         send_resp(conn, 400, json_response)
     end
   end
