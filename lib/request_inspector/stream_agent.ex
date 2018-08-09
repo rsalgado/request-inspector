@@ -15,7 +15,7 @@ defmodule RequestInspector.StreamAgent do
   @doc """
   Sets the PID of the `agent`
   """
-  @spec set_connection_pid(pid, pid) :: pid
+  @spec set_connection_pid(pid | nil, pid) :: pid
   def set_connection_pid(new_pid, agent) do
     Agent.update(agent, fn _ -> new_pid end)
     Logger.debug("StreamAgent #{inspect self()} updated")
@@ -28,7 +28,7 @@ defmodule RequestInspector.StreamAgent do
   @spec get_connection_pid(pid) :: pid | nil
   def get_connection_pid(agent) do
     conn_pid = Agent.get(agent, & &1)
-    
+
     cond do
       conn_pid == nil ->
         nil

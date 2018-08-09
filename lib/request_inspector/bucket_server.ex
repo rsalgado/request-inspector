@@ -9,12 +9,12 @@ defmodule RequestInspector.BucketServer do
     GenServer.start_link(__MODULE__, args, opts)
   end
 
-  @spec get_requests_agent(pid) :: pid
+  @spec get_requests_agent(pid) :: {:ok, pid}
   def get_requests_agent(gen_server) do
     GenServer.call(gen_server, :get_req_agent)
   end
 
-  @spec get_stream_agent(pid) :: pid
+  @spec get_stream_agent(pid) :: {:ok, pid}
   def get_stream_agent(gen_server) do
     GenServer.call(gen_server, :get_stream_agent)
   end
@@ -39,7 +39,7 @@ defmodule RequestInspector.BucketServer do
     |> Enum.map(fn {_, pid, _, _} ->  pid end)
     |> Enum.map(fn(pid) ->  Registry.keys(@registry, pid) end)
     |> Enum.reduce([], fn(x, acc) ->  acc ++ x end)
-  end  
+  end
 
 
   @doc """
@@ -69,7 +69,7 @@ defmodule RequestInspector.BucketServer do
     case Registry.lookup(@registry, name) do
       [{gen_server, nil}] ->
         {:ok, gen_server}
-      
+
       [] ->
         {:error, "Not found"}
     end
@@ -83,12 +83,12 @@ defmodule RequestInspector.BucketServer do
       {:ok, gen_server} ->
         Logger.info("Terminating BucketServer #{name}")
         DynamicSupervisor.terminate_child(@dynamic_supervisor, gen_server)
-      other -> 
+      other ->
         other
     end
   end
 
-  
+
   def init(_args) do
     {:ok, req_agent} = RequestInspector.RequestsAgent.start_link []
     {:ok, stream_agent} = RequestInspector.StreamAgent.start_link []
