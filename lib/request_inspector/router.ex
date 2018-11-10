@@ -53,7 +53,7 @@ defmodule RequestInspector.Router do
       {:ok, _} ->
         json_response = Poison.encode!(%{key: new_key}, pretty: true)
         send_resp(conn, 201, json_response)
-      
+
       _ ->
         json_response = Poison.encode!(%{error: "Couldn't create Bucket"}, pretty: true)
         send_resp(conn, 400, json_response)
@@ -72,7 +72,7 @@ defmodule RequestInspector.Router do
           |> Poison.encode!(pretty: true)
         # Respong with a JSON list with all the requests made to the /endpoint
         send_resp(conn, 200, json_response)
-      
+
       _ ->
         json_response = Poison.encode!(%{error: "Key not found"}, pretty: true)
         send_resp(conn, 400, json_response)
@@ -81,7 +81,11 @@ defmodule RequestInspector.Router do
 
   # Endpoint (send your requests here)
   match "/buckets/:key/endpoint" do
-    conn = put_resp_header(conn, "content-type", "application/json")
+    conn =
+      conn
+      |> put_resp_header("content-type", "application/json")
+      |> put_resp_header("access-control-allow-origin", "*")
+
     case BucketServer.find(key) do
       {:ok, gen_server} ->
         {:ok, requests_agent} = BucketServer.get_requests_agent(gen_server)
@@ -126,7 +130,7 @@ defmodule RequestInspector.Router do
         conn
         |> put_resp_header("content-type", "text/html")
         |> send_file(200, Application.app_dir(:request_inspector, "priv/static/index.html"))
-      
+
       _ ->
         json_response = Poison.encode!(%{error: "Key not found"}, pretty: true)
         conn
@@ -173,7 +177,7 @@ defmodule RequestInspector.Router do
   # Send message to process (PID) to trigger notification
   defp notify_update(stream_agent) do
     conn_pid = StreamAgent.get_connection_pid(stream_agent)
-    if conn_pid do 
+    if conn_pid do
       send(conn_pid, :notify)
     end
   end
@@ -191,7 +195,7 @@ defmodule RequestInspector.Router do
         # If chunk was sent succesfully, loop (with a recursive tail call)
         # If chunk couldn't be sent, send process message to close stream
         case Plug.Conn.chunk(conn, sse_message) do
-          {:ok, conn} ->  
+          {:ok, conn} ->
             stream_loop(conn)
 
           _ ->
@@ -199,7 +203,7 @@ defmodule RequestInspector.Router do
             Logger.warn("Unable to send chunk. Stream is getting closed.")
             conn
         end
-      
+
       :close_stream ->
         # Close the stream (and break the loop). Return the connection
         # This can be used to close connection from iex or another place
